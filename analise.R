@@ -13,7 +13,7 @@ for(stage in stages)
  for(ii in 1:nrow(s_data))
  {
   p_data <- s_data[ii,]
-  x <- p_data[,1:max.seq] %>% as.numeric %>% log
+  x <- p_data[,1:max.seq] %>% as.numeric
   y <- p_data[,-(1:max.seq)] %>% as.numeric
   if(sum(!is.na(y)) < 10)
   {
