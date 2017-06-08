@@ -1,0 +1,20 @@
+playerAlias,Adriano
+gender,M
+age,
+education,Superior Incompleto
+destro,D
+totalPlays,9
+totalCorrect,7
+successRate,0,7
+playId,Adriano,8112016,125044
+stageID,nivel1-v1
+resultInt,optionChosenInt,correct, time
+1,2,False,1124,814
+0,2,False,0,2668941
+2,2,True,2,566818
+1,1,True,0,2835851
+0,0,True,0,3663659
+2,2,True,0,4167418
+1,1,True,3,966835
+0,0,True,0,2996511
+2,2,True,2,100353

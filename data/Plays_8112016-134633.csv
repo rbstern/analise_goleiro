@@ -1,0 +1,23 @@
+playerAlias,Beatriz
+gender,F
+age,19
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,5
+successRate,0,5
+playId,Beatriz,8112016,134633
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+0,1,False,2,800157
+1,2,False,2,150011
+2,1,False,3,016466
+0,2,False,1,367357
+1,1,True,2,133362
+2,1,False,3,033799
+0,2,False,2,017234
+1,1,True,3,016572
+2,1,False,3,033484
+0,0,True,2,933477
+1,1,True,3,017346
+2,2,True,2,800325

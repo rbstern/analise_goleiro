@@ -1,0 +1,23 @@
+playerAlias,Lewis
+gender,M
+age,20
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,9
+successRate,0,9
+playId,Lewis,8112016,133143
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,0,False,3,351642
+0,2,False,29,07934
+1,2,False,1,53396
+2,2,True,0,7508211
+0,0,True,2,58447
+1,1,True,0,9504421
+2,2,True,0,5003779
+0,0,True,3,018481
+1,1,True,0,5173018
+2,2,True,4,968588
+0,0,True,2,901053
+1,1,True,1,584204

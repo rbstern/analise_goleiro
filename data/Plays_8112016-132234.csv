@@ -1,0 +1,23 @@
+playerAlias,
+gender,M
+age,
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,12
+successRate,1
+playId,,8112016,132234
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,2,True,7,266033
+0,0,True,2,882712
+1,1,True,2,749918
+2,2,True,3,416506
+0,0,True,2,416767
+1,1,True,2,617212
+2,2,True,3,017074
+0,0,True,3,182931
+1,1,True,2,633295
+2,2,True,2,800049
+0,0,True,3,900239
+1,1,True,5,265301

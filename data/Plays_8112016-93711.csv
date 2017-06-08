@@ -1,0 +1,16 @@
+playerAlias,s﹑o teste
+gender,M
+age,
+education,Fundamental Completo
+destro,D
+totalPlays,5
+totalCorrect,1
+successRate,0,1
+playId,s﹑o teste,8112016,93711
+stageID,nivel4-v1
+resultInt,optionChosenInt,correct, time
+0,2,False,1,788938
+2,0,False,2,432059
+1,1,True,1,364346
+0,2,False,0,8869951
+2,0,False,0,44978

@@ -1,0 +1,23 @@
+playerAlias,KAKA
+gender,F
+age,19
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,7
+successRate,0,6
+playId,KAKA,8112016,131657
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,1,False,9,136904
+0,0,True,2,285122
+1,2,False,4,369389
+2,1,False,1,600245
+0,0,True,1,333272
+1,2,False,3,033481
+2,0,False,2,768777
+0,0,True,1,800426
+1,1,True,6,869298
+2,2,True,3,934846
+0,0,True,3,350074
+1,1,True,0,6835859

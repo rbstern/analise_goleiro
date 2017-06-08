@@ -1,0 +1,23 @@
+playerAlias,Kelvinsl
+gender,M
+age,18
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,11
+successRate,1
+playId,Kelvinsl,8112016,124847
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,2,True,12,45109
+0,1,False,6,082839
+1,1,True,2,033096
+2,2,True,2,716145
+0,0,True,3,100205
+1,1,True,2,333663
+2,2,True,4,032614
+0,0,True,3,333973
+1,1,True,7,899156
+2,2,True,3,33335
+0,0,True,2,667162
+1,1,True,4,349745

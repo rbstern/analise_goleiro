@@ -1,0 +1,23 @@
+playerAlias,rojas
+gender,M
+age,29
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,10
+successRate,0,9
+playId,rojas,8112016,125714
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,2,True,9,41543
+0,1,False,2,733743
+1,0,False,2,316072
+2,2,True,3,53308
+0,0,True,2,934176
+1,1,True,2,599642
+2,2,True,3,317027
+0,0,True,2,683283
+1,1,True,2,382612
+2,2,True,9,317465
+0,0,True,3,41711
+1,1,True,2,284191

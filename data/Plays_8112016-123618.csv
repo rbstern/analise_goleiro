@@ -1,0 +1,23 @@
+playerAlias,Lubdub
+gender,M
+age,21
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,9
+successRate,0,8
+playId,Lubdub,8112016,123618
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,0,False,6,753384
+0,0,True,7,153175
+1,0,False,6,135734
+2,2,True,5,536987
+0,1,False,5,701891
+1,1,True,4,200914
+2,2,True,6,002041
+0,0,True,6,686857
+1,1,True,5,602516
+2,2,True,3,751559
+0,0,True,4,433764
+1,1,True,2,917129

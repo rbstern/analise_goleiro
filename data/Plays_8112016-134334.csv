@@ -1,0 +1,51 @@
+playerAlias,David Alves
+gender,M
+age,28
+education,Superior Completo
+destro,C
+totalPlays,40
+totalCorrect,28
+successRate,1
+playId,David Alves,8112016,134334
+stageID,grupo2-v2
+resultInt,optionChosenInt,correct, time
+2,0,False,14,95027
+2,1,False,0,7172668
+2,2,True,0,08423901
+1,2,False,0,4340031
+0,1,False,1,100311
+2,0,False,1,416869
+2,2,True,0,2334399
+1,2,False,2,94973
+0,0,True,1,383398
+2,2,True,1,099582
+2,1,False,2,199549
+1,2,False,1,215062
+0,0,True,2,449963
+2,2,True,1,44947
+2,2,True,9,167112
+1,2,False,0,7503221
+0,0,True,0,3492
+2,1,False,2,166562
+2,2,True,1,31634
+1,2,False,1,849567
+0,0,True,0,3502049
+2,2,True,0,750042
+2,2,True,2,116577
+1,2,False,0,9160368
+0,0,True,0,433167
+2,2,True,0,6997461
+2,2,True,0,7497461
+1,1,True,1,450253
+0,0,True,1,549756
+2,2,True,1,382254
+2,2,True,2,351511
+1,1,True,1,666721
+0,0,True,2,200343
+2,2,True,2,165543
+2,2,True,1,533922
+1,1,True,1,282514
+0,0,True,0,5834348
+2,2,True,1,117649
+2,2,True,1,599909
+1,1,True,0,8500631

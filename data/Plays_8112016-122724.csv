@@ -1,0 +1,23 @@
+playerAlias,Emmanuelle
+gender,F
+age,21
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,11
+successRate,1
+playId,Emmanuelle,8112016,122724
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,0,False,1,232927
+0,0,True,2,749542
+1,1,True,0,8837209
+2,2,True,1,100152
+0,0,True,0,01619911
+1,1,True,0,4495959
+2,2,True,1,366347
+0,0,True,0,1328189
+1,1,True,0,1991529
+2,2,True,0,350565
+0,0,True,2,15128
+1,1,True,0,798836

@@ -1,0 +1,23 @@
+playerAlias,Fratel
+gender,M
+age,18
+education,Superior Incompleto
+destro,C
+totalPlays,12
+totalCorrect,5
+successRate,0,4
+playId,Fratel,8112016,124414
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,0,False,4,333356
+0,0,True,3,133088
+1,1,True,5,066315
+2,0,False,3,550078
+0,2,False,3,033152
+1,1,True,1,049501
+2,0,False,3,315675
+0,0,True,2,499683
+1,2,False,2,949458
+2,2,True,3,900453
+0,2,False,3,00024
+1,0,False,2,000181

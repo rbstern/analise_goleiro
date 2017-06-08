@@ -1,0 +1,17 @@
+playerAlias,Wei
+gender,M
+age,20
+education,Fundamental Completo
+destro,D
+totalPlays,6
+totalCorrect,4
+successRate,0,4
+playId,Wei,8112016,134042
+stageID,nivel4-v1
+resultInt,optionChosenInt,correct, time
+0,2,False,1,9586
+2,2,True,0,3501449
+1,0,False,0,3498991
+0,0,True,1,266523
+2,2,True,0,533257
+1,1,True,0,367229

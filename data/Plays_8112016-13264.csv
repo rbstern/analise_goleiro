@@ -1,0 +1,23 @@
+playerAlias,ovo
+gender,M
+age,21
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,9
+successRate,0,9
+playId,ovo,8112016,13264
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,0,False,3,18291
+0,1,False,2,900139
+1,1,True,1,316273
+2,2,True,3,699387
+0,0,True,3,350233
+1,1,True,2,432497
+2,2,True,3,783776
+0,0,True,1,850931
+1,2,False,6,367952
+2,2,True,5,75071
+0,0,True,2,566319
+1,1,True,2,183316

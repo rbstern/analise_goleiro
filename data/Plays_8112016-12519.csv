@@ -1,0 +1,16 @@
+playerAlias,Sturm
+gender,M
+age,34
+education,Superior Completo
+destro,D
+totalPlays,5
+totalCorrect,2
+successRate,0,2
+playId,Sturm,8112016,12519
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+1,1,True,7,066892
+2,1,False,3,033217
+0,2,False,2,850123
+1,1,True,3,032723
+2,1,False,3,031778

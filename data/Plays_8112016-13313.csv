@@ -1,0 +1,51 @@
+playerAlias,henrique chalita
+gender,M
+age,21
+education,Superior Incompleto
+destro,D
+totalPlays,40
+totalCorrect,32
+successRate,1
+playId,henrique chalita,8112016,13313
+stageID,grupo1-v2
+resultInt,optionChosenInt,correct, time
+2,0,False,9,587383
+0,0,True,8,870021
+0,2,False,4,901644
+1,1,True,11,97132
+0,2,False,5,001794
+2,2,True,8,103107
+2,0,False,6,60206
+1,0,False,3,41839
+0,2,False,22,9086
+2,2,True,26,07627
+2,0,False,4,068458
+1,1,True,23,45946
+0,2,False,9,903925
+2,2,True,4,451791
+2,2,True,3,702035
+1,1,True,3,634804
+0,0,True,7,802882
+2,2,True,3,234525
+2,2,True,2,967838
+1,1,True,3,201941
+0,0,True,11,08759
+2,2,True,3,23439
+2,2,True,2,46787
+1,1,True,2,934345
+0,0,True,3,13466
+2,2,True,4,185173
+2,2,True,10,33714
+1,1,True,3,701516
+0,0,True,14,18868
+2,2,True,3,384594
+2,2,True,2,00064
+1,1,True,2,100869
+0,0,True,8,353335
+2,2,True,6,269097
+2,2,True,0,900521
+1,1,True,2,668254
+0,0,True,10,32078
+2,2,True,0,734237
+2,2,True,1,10035
+1,1,True,2,817759

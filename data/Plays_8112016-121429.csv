@@ -1,0 +1,12 @@
+playerAlias,Fernando
+gender,M
+age,
+education,Superior Completo
+destro,D
+totalPlays,1
+totalCorrect,1
+successRate,0,1
+playId,Fernando,8112016,121429
+stageID,nivel1-v1
+resultInt,optionChosenInt,correct, time
+0,0,True,2,983719

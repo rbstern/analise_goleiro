@@ -1,0 +1,23 @@
+playerAlias,mari
+gender,M
+age,23
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,11
+successRate,1
+playId,mari,8112016,121550
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,0,False,2,516287
+0,0,True,2,482955
+1,1,True,2,933875
+2,2,True,2,717178
+0,0,True,2,781973
+1,1,True,2,150627
+2,2,True,5,700155
+0,0,True,2,766058
+1,1,True,2,283094
+2,2,True,2,732782
+0,0,True,2,832502
+1,1,True,3,166079

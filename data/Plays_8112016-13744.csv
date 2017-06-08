@@ -1,0 +1,23 @@
+playerAlias,Murilo
+gender,M
+age,21
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,7
+successRate,0,6
+playId,Murilo,8112016,13744
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,2,True,3,000359
+0,1,False,2,983638
+1,0,False,1,416476
+2,1,False,1,599139
+0,2,False,0,9157519
+1,1,True,1,984201
+2,0,False,3,999477
+0,0,True,3,749354
+1,1,True,0,9829881
+2,2,True,0,8502061
+0,0,True,4,383546
+1,1,True,2,333679

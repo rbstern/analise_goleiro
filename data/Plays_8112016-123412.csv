@@ -1,0 +1,23 @@
+playerAlias,Enrico
+gender,M
+age,20
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,9
+successRate,0,9
+playId,Enrico,8112016,123412
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+1,0,False,5,449142
+2,0,False,2,199484
+0,0,True,1,549367
+1,1,True,4,682708
+2,2,True,2,782661
+0,0,True,3,883233
+1,1,True,2,416813
+2,2,True,47,64817
+0,1,False,4,733
+1,1,True,1,699716
+2,2,True,3,182268
+0,0,True,0,66645

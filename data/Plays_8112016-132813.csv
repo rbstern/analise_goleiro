@@ -1,0 +1,23 @@
+playerAlias,Break
+gender,M
+age,20
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,11
+successRate,0,9
+playId,Break,8112016,132813
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,2,True,7,186296
+0,0,True,5,735589
+1,0,False,5,835536
+2,2,True,6,302533
+0,0,True,1,133264
+1,1,True,0,4335899
+2,2,True,1,117216
+0,0,True,0,3163369
+1,1,True,2,984228
+2,2,True,0,3168099
+0,0,True,0,3502491
+1,1,True,0,3000309

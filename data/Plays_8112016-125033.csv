@@ -1,0 +1,30 @@
+playerAlias,Rojas
+gender,M
+age,29
+education,Superior Incompleto
+destro,D
+totalPlays,19
+totalCorrect,6
+successRate,0,1
+playId,Rojas,8112016,125033
+stageID,nivel1-v1
+resultInt,optionChosenInt,correct, time
+0,1,False,101,9652
+2,2,True,4,699967
+1,1,True,5,034049
+0,1,False,8,31729
+2,0,False,3,666206
+1,1,True,5,033683
+0,0,True,4,433853
+2,0,False,9,866086
+1,1,True,3,167322
+0,2,False,5,04906
+2,0,False,4,217214
+1,2,False,2,032943
+0,1,False,5,315882
+2,0,False,5,382041
+1,2,False,2,249739
+0,1,False,36,48212
+2,2,True,1,366564
+1,0,False,8,181862
+0,2,False,22,14996

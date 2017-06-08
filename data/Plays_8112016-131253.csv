@@ -1,0 +1,23 @@
+playerAlias,Borto
+gender,M
+age,18
+education,Superior Incompleto
+destro,D
+totalPlays,12
+totalCorrect,11
+successRate,1
+playId,Borto,8112016,131253
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,2,True,2,35118
+0,1,False,4,134597
+1,1,True,2,983983
+2,2,True,3,617548
+0,0,True,3,818101
+1,1,True,4,318022
+2,2,True,4,418226
+0,0,True,3,483681
+1,1,True,4,851708
+2,2,True,2,901237
+0,0,True,2,733929
+1,1,True,2,550234

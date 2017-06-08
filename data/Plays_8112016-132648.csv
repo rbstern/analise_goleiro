@@ -1,0 +1,23 @@
+playerAlias,Pelin
+gender,M
+age,22
+education,Fundamental Completo
+destro,D
+totalPlays,12
+totalCorrect,11
+successRate,0,9
+playId,Pelin,8112016,132648
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,2,True,1,950009
+0,0,True,4,850216
+1,2,False,4,932599
+2,2,True,4,016371
+0,0,True,5,467315
+1,1,True,2,766362
+2,2,True,3,133373
+0,0,True,2,732615
+1,1,True,4,967174
+2,2,True,2,582655
+0,0,True,4,132575
+1,1,True,3,000772

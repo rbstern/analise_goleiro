@@ -1,0 +1,15 @@
+playerAlias,
+gender,M
+age,18
+education,Superior Incompleto
+destro,D
+totalPlays,4
+totalCorrect,1
+successRate,0,1
+playId,,8112016,1310
+stageID,nivel4-v1
+resultInt,optionChosenInt,correct, time
+0,1,False,14,93624
+2,1,False,0,66641
+1,1,True,0,4172201
+0,1,False,1,665418

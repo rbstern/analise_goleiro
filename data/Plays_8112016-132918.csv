@@ -1,0 +1,14 @@
+playerAlias,estrela
+gender,M
+age,21
+education,Fundamental Completo
+destro,D
+totalPlays,3
+totalCorrect,2
+successRate,0,2
+playId,estrela,8112016,132918
+stageID,nivel4-v1
+resultInt,optionChosenInt,correct, time
+0,0,True,16,20079
+2,2,True,4,583057
+1,0,False,0,4999809

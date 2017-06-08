@@ -1,0 +1,18 @@
+playerAlias,Ceni
+gender,M
+age,18
+education,Fundamental Completo
+destro,D
+totalPlays,7
+totalCorrect,5
+successRate,0,5
+playId,Ceni,8112016,132623
+stageID,nivel4-v1
+resultInt,optionChosenInt,correct, time
+0,2,False,4,67559
+2,1,False,1,249316
+1,1,True,0,7332859
+0,0,True,0,94927
+2,2,True,0,600018
+1,1,True,0,700032
+0,0,True,2,566449

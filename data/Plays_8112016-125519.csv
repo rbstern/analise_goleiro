@@ -1,0 +1,23 @@
+playerAlias,dessacqr
+gender,F
+age,27
+education,Superior Completo
+destro,D
+totalPlays,12
+totalCorrect,11
+successRate,1
+playId,dessacqr,8112016,125519
+stageID,grupo1-v1
+resultInt,optionChosenInt,correct, time
+2,0,False,1,450803
+0,0,True,3,217948
+1,1,True,2,683716
+2,2,True,2,351316
+0,0,True,3,318188
+1,1,True,2,851401
+2,2,True,2,750759
+0,0,True,0,7833509
+1,1,True,2,967883
+2,2,True,3,101498
+0,0,True,2,817658
+1,1,True,0,5839951
