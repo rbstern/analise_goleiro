@@ -1,42 +1,79 @@
+library(broom)
 library(dplyr)
+library(ellipse)
 library(ggplot2)
+library(magrittr)
+library(tibble)
 
+##Analise acertos~tempo por jogador
 data <- readRDS("./clean_data/data.R")
-stages <- data[,1] %>% unique
-projections <- NULL
-for(stage in stages)
-{
- s_data <- data %>% filter(stages==stage)
- s_data <- s_data[,-1]
- max.seq <- dim(s_data)[2]/2
- coefs <- matrix(NA, nrow=nrow(s_data), ncol=2)
- for(ii in 1:nrow(s_data))
- {
-  p_data <- s_data[ii,]
-  x <- p_data[,1:max.seq] %>% as.numeric
-  y <- p_data[,-(1:max.seq)] %>% as.numeric
-  if(sum(!is.na(y)) < 10)
-  {
-   coefs[ii, ] <- c(NA, NA)
-  }
-  else
-  {
-   coefs[ii,] <- glm(y~x, family=binomial(link="logit"))$coefficients
-  }
- }
- 
- coefs <- data.frame(rep(stage, nrow(coefs)), coefs)
- projections <- rbind(projections, coefs)
-}
-names(projections) <- c("stages", "alfa", "beta")
-saveRDS(projections, "./clean_data/projecoes.R")
+data %<>% group_by(id) %>%
+          filter(n() > 5)
+coefs <- data %>% do(tidy(glm(acerto~tempo, 
+                              data=., 
+                              family=binomial(link="logit")))) %>%
+         group_by(id) %>% 
+         select(term, estimate)
+coefs <- split(coefs, coefs$term)
+coefs$"(Intercept)" %<>% select(id, estimate)
+colnames(coefs$"(Intercept)") <- c("id", "alfa")
+coefs$"tempo" %<>% select(id, estimate)
+colnames(coefs$"tempo") <- c("id", "beta")
+coefs <- merge(coefs$"(Intercept)", coefs$"tempo", by="id")
+coefs <- merge(data %>% select(id,stage) %>% unique, by="id", coefs) %>%
+         as.tibble
+saveRDS(coefs, "./clean_data/projecoes.R")
 
-proj <- readRDS("./clean_data/projecoes.R")
-proj[abs(proj[,2]) < 20,] %>% ggplot(aes(alfa,beta,col=stages))+
-                              geom_point()
+coefs <- readRDS("./clean_data/projecoes.R")
+coefs %>% filter(abs(alfa)<20) %>%
+  ggplot(aes(alfa,beta,col=stage))+
+  geom_point()
 ggsave("./plots/scatter-hab-grupo.pdf")
 
-means <- proj[abs(proj[,2]) < 20,] %>% group_by(stages) %>% 
-  summarise(alfa=mean(alfa), beta=mean(beta))
-means %>% ggplot(aes(alfa,beta,col=stages))+geom_point()
+coefs %>% filter(abs(alfa)<20) %>%
+          group_by(stage) %>% 
+          summarise(alfa=mean(alfa), beta=mean(beta)) %>%
+          ggplot(aes(alfa,beta,col=stage))+geom_point()
 ggsave("./plots/scatter-mean-hab-grupo.pdf")
+
+
+##Analise acertos~log(tempo) por jogador
+data2 <- data %>% mutate(tempo=log(tempo))
+coefs <- data2 %>% do(tidy(glm(acerto~tempo, 
+                              data=., 
+                              family=binomial(link="logit")))) %>%
+                  group_by(id) %>% 
+                  select(term, estimate)
+coefs <- split(coefs, coefs$term)
+coefs$"(Intercept)" %<>% select(id, estimate)
+colnames(coefs$"(Intercept)") <- c("id", "alfa")
+coefs$"tempo" %<>% select(id, estimate)
+colnames(coefs$"tempo") <- c("id", "beta")
+coefs <- merge(coefs$"(Intercept)", coefs$"tempo", by="id")
+coefs <- merge(data %>% select(id,stage) %>% unique, by="id", coefs) %>%
+         as.tibble
+saveRDS(coefs, "./clean_data/projecoes2.R")
+
+coefs <- readRDS("./clean_data/projecoes2.R")
+coefs %>% filter(abs(alfa)<20) %>%
+          ggplot(aes(alfa,beta,col=stage))+
+          geom_point()+
+          stat_ellipse()
+ggsave("./plots/scatter-hab-grupo-2.pdf")
+
+coefs %>% filter(abs(alfa)<20) %>%
+  group_by(stage) %>% 
+  summarise(alfa=mean(alfa), beta=mean(beta)) %>%
+  ggplot(aes(alfa,beta,col=stage))+geom_point()
+ggsave("./plots/scatter-mean-hab-grupo-2.pdf")
+
+
+##Analise acertos~tempo+contexto
+data <- readRDS("./clean_data/data.R")
+data %>% group_by(stage) %>% 
+         do(tidy(glm(acerto~tempo, 
+                     data=., 
+                     family=binomial(link="logit")))) %>%
+         group_by(stage) %>% 
+         select(term, estimate)
+         

@@ -1,36 +1,31 @@
 library(dplyr)
+library(magrittr)
+library(tibble)
 
 arqs <- list.files("./data")
-stages <- rep(NA, length(arqs))
-max.seq <- 0
+data <- rep(NA, length(arqs)) %>% as.list
 for(ii in 1:length(arqs))
 {
   con <- paste("./data/",arqs[ii],sep="") %>% file("r")
   lines <- con %>% readLines
-  stages[ii] <- (lines[10] %>% strsplit(",") %>% unlist)[2]
-  max.seq <- max(max.seq, lines[12:length(lines)] %>% length)
   close(con)
+  stage <- (lines[10] %>% strsplit(",") %>% unlist)[2]
+  r_data <- lines[12:length(lines)] %>%
+              strsplit(",")
+  c_data <- 1:length(r_data) %>% 
+            lapply(function(tt) c(arqs[ii],
+                                  stage,
+                                  tt,
+                                  r_data[[tt]][3] %>% as.logical,
+                                  r_data[[tt]][1] %>% as.numeric))
+  if(length(r_data) == 0) c_data <- NULL
+  data[[ii]] <- c_data
 }
-
-tempos <- 1:max.seq %>% rep(length(arqs))
-dim(tempos) <- c(max.seq, length(arqs))
-tempos <- tempos %>% t %>% as.matrix
-colnames(tempos) <- 1:max.seq %>% 
-                    sapply(function(x) paste("tempo",x,sep=""))
-
-acertos <- matrix(NA, nrow=length(arqs), ncol=max.seq)
-for(ii in 1:length(arqs))
-{
-  con <- paste("./data/",arqs[ii],sep="") %>% file("r")
-  lines <- con %>% readLines
-  estes_acertos <- lines[12:length(lines)] %>%
-                   strsplit(",") %>%
-                   sapply(function(x) x[3] %>% as.logical)
-  acertos[ii,1:length(estes_acertos)] <- estes_acertos
-  close(con)
-}
-colnames(acertos) <- 1:max.seq %>% 
-                     sapply(function(x) paste("acerto",x,sep=""))
-
-data <- data.frame(stages, tempos, acertos)
+data %<>% unlist %>% matrix(ncol=5,byrow=TRUE) %>% as_tibble
+colnames(data) <- c("id", "stage", "tempo", "acerto", "seq")
+data %<>% mutate(id=as.factor(id), 
+                 stage=as.factor(stage), 
+                 tempo=as.numeric(tempo), 
+                 acerto=as.logical(acerto),
+                 seq=as.numeric(seq))
 saveRDS(data, "./clean_data/data.R")
