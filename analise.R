@@ -85,18 +85,11 @@ coefs %>% filter(abs(alfa)<20) %>%
             inherit.aes = T)
 ggsave("./plots/scatter-hab-grupo-2.pdf")
 
-coefs %>% filter(abs(alfa)<20) %>%
-  group_by(stage) %>% 
-  summarise(alfa=mean(alfa), beta=mean(beta)) %>%
-  ggplot(aes(alfa,beta,col=stage))+geom_point()
-ggsave("./plots/scatter-mean-hab-grupo-2.pdf")
-
-
 ##Analise acertos~tempo+contexto
 data <- readRDS("./clean_data/data.rds")
 data %>% group_by(stage) %>% 
          do(tidy(glm(acerto~tempo, 
-                     data=., 
+                       data=., 
                      family=binomial(link="logit")))) %>%
          group_by(stage) %>% 
          select(term, estimate)
