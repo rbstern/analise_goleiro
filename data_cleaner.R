@@ -28,4 +28,4 @@ data %<>% mutate(id=as.factor(id),
                  tempo=as.numeric(tempo), 
                  acerto=as.logical(acerto),
                  seq=as.numeric(seq))
-saveRDS(data, "./clean_data/data.R")
+saveRDS(data, "./clean_data/data.rds")
