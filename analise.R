@@ -6,6 +6,13 @@ library(magrittr)
 library(purrr)
 library(purrrlyr)
 library(tibble)
+
+data <- readRDS("./clean_data/data.rds")
+data %>% group_by(id) %>% 
+         summarise(stage=unique(stage), max_jog=max(tempo)) %>%
+         ggplot(aes(x=max_jog, col=stage))+geom_histogram(bins=10)
+ggsave("./plots/num-jogadas.pdf")
+
 ##Analise acertos~tempo por jogador
 data <- readRDS("./clean_data/data.rds")
 data %<>% group_by(id) %>%
