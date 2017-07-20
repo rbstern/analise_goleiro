@@ -28,6 +28,7 @@ Variáveis:
 - playeralias: identificador do paciente.
 - playid: a fase do jogo desta jogada (grupo1-v1; grupo1-v2; grupo1-v3).
 - optionchoosen: o numero escolhido pelo paciente nesta jogada (1, 2 ou 3).
+- sequexecuted: a sequência de respostas corretas na fase atual.
 - sessiontime: tempo de relogio em que o paciente iniciou o jogo.
 - successrate: a frequencia de acertos deste paciente na fase atual do jogo (totalcorrect/limitplays).
 - totalcorrect: o número total de acertos do paciente na fase atual do jogo.
@@ -40,7 +41,6 @@ Variáveis desconhecidas:
 - gametime: ?.
 - minhits: ?.
 - movementtime: ?.
-- sequexecuted: ?.
 - timeuntilanykey: ? (muitos NA's).
 - timeuntilshowagain: ? (muitos NA's).
 - waitedresult: ?.
