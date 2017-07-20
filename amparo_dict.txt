@@ -17,6 +17,9 @@ Variáveis:
 - decisiontime: tempo que o paciente demorou para selecionar uma resposta (muitos NA's).
 - ehrandom: Se Y, a resposta para esta jogada foi gerada aleatoriamente. 
             Caso contrário, foi gerada deterministicamente.
+- game: Se AQ, jogo de aquecimento,
+        Se JG, jogo do goleiro,
+        Se JM, jogo da memória.
 - gamemode: Se "readSequ", seed fixa para números aleatórios. Caso contrário, não.
 - limitplays: o número de jogadas que o paciente tem na fase atual do jogo (8, 12, 40, 60).
 - move: o número da jogada deste paciente na atual fase.
