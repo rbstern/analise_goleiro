@@ -3,14 +3,18 @@ library(dplyr)
 library(ellipse)
 library(ggplot2)
 library(magrittr)
+library(mcmc)
 library(purrr)
 library(purrrlyr)
+library(rstan)
 library(tibble)
 
-##Analise acertos~tempo por jogador
+#Carregar BD
 data <- read.csv("../amparo.csv")
-data %<>% mutate(id.alias=paste(playid,playeralias,sep="")) %>%
-          group_by(id.alias)
+data %<>% mutate(id.alias=paste(playid,playeralias,sep=""))
+
+##Analise acertos~tempo por jogador
+##Regressão Logística
 coefs <- data %>% do(tidy(glm(correct~move, 
                               data=., 
                               family=binomial(link="logit")))) %>%
@@ -55,3 +59,24 @@ coefs %>% filter(abs(alfa)<5) %>%
                     inherit.aes = T)
 ggsave("./plots/scatter-hab-grupo-amparo.pdf")
 
+##############################################
+## modificações na logística (em andamento) ##
+##############################################
+data2 <- data %>% mutate(alias=playeralias %>% as.numeric,
+                         id=playid %>% as.numeric) %>%
+                  select(alias, correct, id, move) 
+#É necessário passar algumas informações
+#explicitamente para o código do stan.
+n <- data2$alias %>% max #numero de pacientes. 
+t <- data2$id %>% max    #número de tratamentos.
+m <- data2 %>% nrow      #numero total de jogadas (linhas).
+acerto <- data2$correct %>% as.character %>% 
+          tolower == "true" %>% as.numeric
+alias <- data2$alias
+id <- data2$id
+move <- data2$move
+
+amostra <- stan(file="amparo.stan", 
+                data=c("n", "t", "m", "acerto", 
+                       "alias", "id", "move"), 
+                iter=10^4, chains=1)
