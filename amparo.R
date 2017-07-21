@@ -11,11 +11,13 @@ library(tibble)
 
 #Carregar BD
 data <- read.csv("../amparo.csv")
-data %<>% mutate(id.alias=paste(playid,playeralias,sep=""))
+data %<>% filter(game=="JG") %>%
+          mutate(id.alias=paste(playid,playeralias,sep=""))
 
 ##Analise acertos~tempo por jogador
 ##Regressão Logística
-coefs <- data %>% do(tidy(glm(correct~move, 
+coefs <- data %>% group_by(id.alias) %>%
+                  do(tidy(glm(correct~move, 
                               data=., 
                               family=binomial(link="logit")))) %>%
          group_by(id.alias) %>% 
@@ -62,21 +64,31 @@ ggsave("./plots/scatter-hab-grupo-amparo.pdf")
 ##############################################
 ## modificações na logística (em andamento) ##
 ##############################################
-data2 <- data %>% mutate(alias=playeralias %>% as.numeric,
+data2 <- data %>% mutate(acerto=(correct=="TRUE") %>% as.numeric,
+                         alias=playeralias %>% as.numeric,
                          id=playid %>% as.numeric) %>%
-                  select(alias, correct, id, move) 
+                  select(acerto, alias, id, move) 
 #É necessário passar algumas informações
 #explicitamente para o código do stan.
-n <- data2$alias %>% max #numero de pacientes. 
-t <- data2$id %>% max    #número de tratamentos.
-m <- data2 %>% nrow      #numero total de jogadas (linhas).
-acerto <- data2$correct %>% as.character %>% 
-          tolower == "true" %>% as.numeric
+p <- data2$alias %>% max #numero de pacientes. 
+f <- data2$id %>% max    #numero de fases.
+m <- p*f                 #numero de combinacoes paciente x fase.
+n <- data2 %>% nrow      #numero total de jogadas (linhas).
+acerto <- data2$acerto
 alias <- data2$alias
 id <- data2$id
+fator <- t*(alias-1)+id
 move <- data2$move
 
 amostra <- stan(file="amparo.stan", 
-                data=c("n", "t", "m", "acerto", 
-                       "alias", "id", "move"), 
-                iter=10^4, chains=1)
+                data=c("m","n", "acerto", "fator", "move"), 
+                iter=1000, chains=1)
+saveRDS(amostra, "./clean_data/glm-amparo.rds")
+
+amostra <- readRDS("./clean_data/glm-amparo.rds")
+beta <- amostra %>% extract("beta")
+gamma <- amostra %>% extract("gamma")
+beta.m <- beta$beta %>% colMeans
+gamma.m <- gamma$gamma %>% colMeans
+cols <- nivel %% 4
+cbind(beta.m,gamma.m) %>% plot(col=cols)

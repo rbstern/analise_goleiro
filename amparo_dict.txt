@@ -8,9 +8,12 @@ Descrição: Um paciente participa deste jogo, participando de 3 fases.
 
 Unidade amostral: A jogada de um paciente em uma determinada fase do jogo.
 
+Informação completa disponível em: 
+https://github.com/neuromat/goleiro-godot/wiki/Results
+
 Variáveis:
 -----------
-
+- animationtype: Tipo de animação que é exibida durante a jogada.
 - correct: Se TRUE, o paciente escolheu a resposta correta.
            Se false, o paciente escolheu a jogada errada.
 - contexts_and_probs: informações sobre o mecanismo gerador de respostas nesta fase.
@@ -35,7 +38,7 @@ Variáveis:
 
 Variáveis desconhecidas:
 ------------------------
-- animationtype: ?.
+
 - gamedata: ?.
 - gamerandom: ?.
 - gametime: ?.
@@ -44,7 +47,6 @@ Variáveis desconhecidas:
 - timeuntilanykey: ? (muitos NA's).
 - timeuntilshowagain: ? (muitos NA's).
 - waitedresult: ?.
-
 
 Variáveis ainda não implementadas:
 ----------------------------------
