@@ -1,0 +1,13 @@
+# Ignored files #
+#################
+
+#Latex auxiliary files
+*.aux
+*.bbl
+*.blg
+*.log
+*.nav
+*.out
+*.snm
+*.synctex
+*.toc
