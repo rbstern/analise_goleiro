@@ -20,12 +20,33 @@ data %<>% filter(player.Alias %in% base) %>%
   mutate(cum_mean = cumsum(acertou_lgl)/(1:n()))
 
 labels <- read.csv("../labels.csv")
-labels2 <- data.frame(playeralias=labels$CÓDIGO, 
+labels2 <- data.frame(playeralias=labels$COD_,
+                      idade=labels$IDAD_,
+                      sexo=labels$SEXO_,
                       HY_=labels$HY_,
-                      idade=labels$Idade,
-                      escolaridade=labels$Escolaridade)
-labels2 %<>% mutate(escolaridade=2*grepl("Superior", labels$Escolaridade)+
-                                1*grepl("Médio", labels$Escolaridade),
+                      escolaridade=labels$ESCOL_,
+                      moca_abs= labels$MoCA_abstração,
+                      moca_ate= labels$MoCA_atenção,
+                      moca_evoc= labels$MoCA_evoc_tardia,
+                      moca_lin= labels$MoCA_linguagem,
+                      moca_nom= labels$MoCA_nomeação,
+                      moca_ori= labels$MoCA_orientação,
+                      moca_vis= labels$MoCA_visuoesp_exec,
+                      moca_tot= labels$MoCA_TOTAL,
+                      best_lim= labels$BEST_Lim_Estab_Vert_ %>% as.numeric,
+                      best_marcha= labels$BEST_Estab_Marcha_ %>% as.numeric,
+                      best_orient= labels$BEST_Orient_Sens_,
+                      best_reat= labels$BEST_Reat_,
+                      best_rest= labels$BEST_Rest_Biom_ %>% as.numeric,
+                      best_trans= labels$BEST_Trans_Antec_ %>% as.numeric,
+                      best_tot= labels$BEST_ %>% as.numeric,
+                      updrs_post= labels$Est_Post_UPDRS_III %>% as.numeric ,
+                      updrs_rig= labels$Rigidez_UPDRS_III %>% as.numeric ,
+                      updrs_trem= labels$Tremor_UPDRS_III %>% as.numeric ,
+                      updrs_tot= labels$UPDRS_III %>% as.numeric)
+
+labels2 %<>% mutate(escolaridade=2*grepl("Superior", labels$ESCOL_)+
+                                1*grepl("Médio", labels$ESCOL_),
                     HY_=HY_ %>% as.numeric %% 4)
 
 data <- inner_join(data,labels2)
