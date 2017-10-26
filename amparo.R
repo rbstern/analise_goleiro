@@ -1,26 +1,21 @@
-#Tarefas
-#dupla tarefa
-
 library(boot)
 library(broom)
-library(dplyr)
 library(ellipse)
 library(ggplot2)
 library(glmnet)
 library(magrittr)
 library(mcmc)
-library(purrr)
 library(purrrlyr)
 library(randomForest)
 library(rpart)
 library(rstan)
-library(tibble)
 library(tidyverse)
 library(tree)
 
 #Carregar BD
-data <- read.csv("../data.csv")
-labels <- read.csv("../labels.csv")
+#Em linux data.rds pode ser preferivel.
+data <- read.csv("./data/amparo/data.csv")
+#labels <- read.csv("./data/amparo/labels.csv")
   
 #Análise descritiva de taxa de acerto.
 #aux <- data %>% 
@@ -45,21 +40,22 @@ labels <- read.csv("../labels.csv")
 #dev.off()
 
 ##Grazie mile, Fernando Correa.
-desenha_ellipse <- function(df, ...){
- ok_stages <- coefs %>% group_by(playid) %>%
- summarise(n=n()) %>%
- filter(n>5) %>%
- select(playid) %>%
- unlist
- df %>% filter(playid %in% ok_stages) %>%
- group_by(...) %>%
- by_slice(function(df){ ellipse(x =cov(df)/nrow(df),
-                                centre=colMeans(df),
-                                level = 0.95, 
-                                npoints = 100) %>%
-          as.data.frame()},
-          .collate = 'rows')
-}
+##Elipses de confiança para parâmetros.
+#desenha_ellipse <- function(df, ...){
+# ok_stages <- coefs %>% group_by(playid) %>%
+# summarise(n=n()) %>%
+# filter(n>5) %>%
+# select(playid) %>%
+# unlist
+# df %>% filter(playid %in% ok_stages) %>%
+# group_by(...) %>%
+# by_slice(function(df){ ellipse(x =cov(df)/nrow(df),
+#                                centre=colMeans(df),
+#                                level = 0.95, 
+#                                npoints = 100) %>%
+#          as.data.frame()},
+#          .collate = 'rows')
+#}
 
 ##########################################################
 ## Extrações de covariáveis a partir do Jogo do Goleiro ##
@@ -260,6 +256,7 @@ variaveis.expl <- (expl %>% names)[-1]
 ###################
 
 #Regressão logística
+#Izbicki
 formula <- paste("moca_abs~",
                  variaveis.expl %>% paste(collapse="+"),sep="")
 results <- NULL
@@ -270,24 +267,46 @@ for(tvar in variaveis.resp)
   if(dt.gol[[tvar]] %>% is.na %>% sum) { dt.gol.u <- dt.gol2 }
   base.1 <- dt.gol.u[[tvar]] %>% mean
   base.1 <- max(base.1,1-base.1)
-  #aux <- glm(formula, family=binomial, data=dt.gol.u)
+  aux <- glm(formula, family=binomial, data=dt.gol.u)
+  err <- (cv.glm(dt.gol.u, aux)$delta)[1]
+  #Izbicki ROC
+  pos <- (dt.gol.u[[tvar]] == 1) %>% which
+  preds <- (predict(aux, dt.gol.u) >= 0)
+  sens <- mean(preds[pos]==1)
+  spec <- mean(preds[-pos]==0)
+  #Izbicki ROC
+  results <- rbind(results,
+                   data.frame(var=tvar,
+                              base=base.1,
+                              acc=1-err,
+                              method="binomial",
+                              sens=sens,
+                              spec=spec))
+}
+results %<>% as.tibble
+results %<>% mutate(incr=acc-base) %>%
+             arrange(incr)
+results
+#saveRDS(results, "./results/JG-predict.rds")
+#results <- readRDS("./results/JG-predict.rds")
+
+# Regressão logistica usando glmnet
+results <- NULL
+for(tvar in variaveis.resp)
+{
+  dt.gol.u <- dt.gol
+  if(dt.gol[[tvar]] %>% is.na %>% sum) { dt.gol.u <- dt.gol2 }
+  base.1 <- dt.gol.u[[tvar]] %>% mean
+  base.1 <- max(base.1,1-base.1)
   x= dt.gol.u %>% select(variaveis.expl) %>% as.matrix
   y= dt.gol.u %>% select(tvar) %>% as.matrix %>% as.factor
   aux <- cv.glmnet(x,y,family="binomial",type.measure="class")
   i <- which(aux$lambda == aux$lambda.min)
   mse.min <- aux$cvm[i]
-  #err <- (cv.glm(dt.gol.u, aux)$delta)[1]
-  #pos <- (dt.gol.u[[tvar]] == 1) %>% which
-  #preds <- (predict(aux, dt.gol.u) >= 0)
-  #sens <- mean(preds[pos]==1)
-  #spec <- mean(preds[-pos]==0)
-  #results <- rbind(results,
-  #                 data.frame(var=tvar,
-  #                            base=base.1,
-  #                            acc=1-err,
-  #                            method="binomial",
-  #                            sens=sens,
-  #                            spec=spec))
+  pos <- (dt.gol.u[[tvar]] == 1) %>% which
+  preds <- (predict(aux, dt.gol.u) >= 0)
+  sens <- mean(preds[pos]==1)
+  spec <- mean(preds[-pos]==0)
   results <- rbind(results,
                    data.frame(var=tvar,
                               base=base.1,
@@ -295,7 +314,7 @@ for(tvar in variaveis.resp)
 }
 results %<>% as.tibble
 results %<>% mutate(incr=acc-base) %>%
-             arrange(incr)
+  arrange(incr)
 results
 #saveRDS(results, "./results/JG-predict.rds")
 #results <- readRDS("./results/JG-predict.rds")

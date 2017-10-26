@@ -1,13 +1,12 @@
-library(dplyr)
 library(magrittr)
-library(tibble)
+library(tidyverse)
 
-data <- read.csv("../amparo.csv")
+data <- read.csv("./data/amparo/amparo.csv")
 dt <- data %>% filter(game == "AQ", total.Correct >= 3)
 base <- dt$player.Alias %>% unique 
 
 data %<>% filter(player.Alias %in% base) %>%
-  mutate(playeralias=player.Alias, playid=playID) %>%
+  mutate(playeralias=player.Alias %>% as.factor, playid=playID) %>%
   mutate(new_playid=paste(game,playid,sep="-")) %>%
   mutate(alias=playeralias %>% as.numeric) %>%
   mutate(id=new_playid %>% as.factor %>% as.numeric) %>%
@@ -19,8 +18,10 @@ data %<>% filter(player.Alias %in% base) %>%
   group_by(id_alias_fct) %>%
   mutate(cum_mean = cumsum(acertou_lgl)/(1:n()))
 
-labels <- read.csv("../labels.csv")
-labels2 <- data.frame(playeralias=labels$COD_,
+labels <- read.csv("./data/amparo/labels.csv")
+labels %<>% filter(labels$COD_ %in% base)
+             
+labels2 <- data.frame(playeralias=labels$COD_ %>% as.factor,
                       idade=labels$IDAD_,
                       sexo=labels$SEXO_,
                       HY_=labels$HY_,
@@ -50,4 +51,6 @@ labels2 %<>% mutate(escolaridade=2*grepl("Superior", labels$ESCOL_)+
                     HY_=HY_ %>% as.numeric %% 4)
 
 data <- inner_join(data,labels2)
-write.csv(data, "../data.csv")
+write.csv(data, "./data/amparo/data.csv")
+#não rodar por sigilo do DB
+#saveRDS(data, "./data/amparo/data.rds")
