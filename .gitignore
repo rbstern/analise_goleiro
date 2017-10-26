@@ -1,6 +1,13 @@
 # Ignored files #
 #################
 
+#Dados
+*.csv
+*.xlsx
+
+#R
+.Rhistory
+
 #Latex auxiliary files
 *.aux
 *.bbl
