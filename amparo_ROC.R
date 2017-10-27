@@ -237,9 +237,15 @@ for(tvar in variaveis.resp[-1])
   base.1 <- dt.gol.u[[tvar]] %>% mean
   base.1 <- max(base.1,1-base.1)
   aux <- glm(formula, family=binomial, data=dt.gol.u)
-  err <- (cv.glm(dt.gol.u, aux)$delta)[1]
+  cost <- function(r, pi = 0) mean(abs(r-pi) > 0.5)
+  err <- (cv.glm(dt.gol.u, aux,cost)$delta)[1]
   
   pos <- (dt.gol.u[[tvar]] == 1) %>% which
+  
+  # leave-one-out and 11-fold cross-validation prediction error for 
+  # the nodal data set.  Since the response is a binary variable an
+  # appropriate cost function is
+  
   
   k <- nrow(dt.gol.u)
   predictions <- rep(NA,k)
@@ -295,6 +301,8 @@ for(tvar in variaveis.resp[-1])
   aux <- cv.glmnet(x,y,family="binomial",
                    keep = TRUE,nfolds = nrow(dt.gol.u))
   i <- which(aux$lambda == aux$lambda.min)
+  # coeficientes:
+  coefficients(aux,s=aux$lambda.min)
   pos <- (dt.gol.u[[tvar]] == 1) %>% which
   
   preds <- aux$fit.preval[,i]>1/2
