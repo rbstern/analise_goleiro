@@ -1,3 +1,4 @@
+library(boot)
 library(magrittr)
 library(tidyverse)
 
@@ -8,7 +9,7 @@ data <- read.csv("../data/amparo/data.csv")
 #Análise descritiva de taxa de acerto.
 aux <- data %>% 
   group_by(id_alias_fct) %>%
-  do(plots=ggplot(data=.,aes(x=move,y=cum_mean))+
+  do(plots = ggplot(data=., aes(x = move, y = cum_mean))+
        geom_point()+
        ggtitle(unique(.$playeralias)))
 pdf("../plots/amparo-cum_mean.pdf")
@@ -19,8 +20,9 @@ dev.off()
 aux <- data %>% 
        filter(move != 1) %>%
        group_by(id_alias_fct) %>%
-       do(plots=ggplot(data=.,aes(x=move,y=movementtime,
-                                  colour=acertou_lgl))+
+       do(plots = ggplot(data = ., aes(x = move, 
+                                       y = movementtime,
+                                       colour = acertou_lgl))+
        geom_point()+
        ggtitle(unique(.$playeralias)))
 pdf("../plots/amparo-movementtime.pdf")
@@ -31,42 +33,41 @@ dev.off()
 # Análise descritiva das covariáveis obtidas no JG #
 ####################################################
 
-stan.data <- readRDS("../clean_data/amparo-JG-stan-data.rds")
-estagios_modelados <- stan.data$estagios_modelados
-data2 <- data %>% filter(new_playid %in% estagios_modelados)
-fator_nobs <- stan.data$fator_nobs
-stan.param <- stan.data$param
+stan_info <- readRDS("../data/amparo/amparo-JG-stan-data.rds")
+estagios <- stan_info$estagios
+data %<>% inner_join(estagios, by = "new_playid")
 
-stan.param %<>% mutate(escol=as.factor(escol),
-                       hy=ifelse(is.na(hy), 0, hy) %>% as.factor,
-                       id=as.factor(id))
+stan_param <- stan_info$param %>%
+  mutate(escolaridade = as.factor(escolaridade),
+         id           = as.factor(id),
+         hy           = as.factor(hy))
 
-stan.param %>% ggplot(aes(x=id, y=gamma.m, fill=hy))+
+stan_param %>% ggplot(aes(x = id, y = gamma_m, fill = hy))+
                geom_boxplot()
 ggsave("../plots/amparo-stan-hy.pdf")
 dev.off()
 
-stan.param %>% ggplot(aes(x=id, y=gamma.m, fill=escol))+
+stan_param %>% ggplot(aes(x = id, y = gamma_m, fill = escolaridade))+
                geom_boxplot()
 ggsave("../plots/amparo-stan-escol.pdf")
 dev.off()
 
 #Curvas de acerto estimadas
 #Precisam ser ajustadas para o novo modelo
-aux <- data2 %>%
+aux <- data %>%
        group_by(fator) %>%
-       do(plots=ggplot(data=.,aes(x=move,y=cum_mean))+
+       do(plots = ggplot(data = ., aes(x = move, y = cum_mean))+
           geom_point()+
           ggtitle(unique(.$playeralias)))
-curvas_param <- inner_join(aux, stan.param)
+curvas_param <- inner_join(aux, stan_param, by="fator")
 final_plot <- function(pp, b, g)
 {
-  glm_mod <- function(move) g*inv.logit(-log(3*g-1)+move*b) #Ajuste
+  glm_mod <- function(move) g*inv.logit(-log(3*g - 1) + (move-1)*b) #Ajuste
   pp+stat_function(fun=glm_mod)
 }
-this_list <- list(pp=curvas_param$plots,
-                  b=curvas_param$beta.m,
-                  g=curvas_param$gamma.m)
+this_list <- list(pp = curvas_param$plots,
+                  b  = curvas_param$beta_m,
+                  g  = curvas_param$gamma_m)
 aux2 <- pmap(this_list, final_plot)
 pdf("../plots/amparo-cum_mean-stan.pdf")
 aux2
