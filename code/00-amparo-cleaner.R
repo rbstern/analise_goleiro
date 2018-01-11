@@ -79,3 +79,9 @@ data <- inner_join(data, labels_clean, by="playeralias")
 write.csv(data, "../data/amparo/data.csv")
 #não rodar por sigilo do DB
 #saveRDS(data, "../data/amparo/data.rds")
+
+#not ready
+#labels_clean_dt <- labels %>%
+#  mutate(moca_tot <- moca_total,
+#         n_pal <- palavras_bl_30,
+#         d_pas <- x30_ts)
