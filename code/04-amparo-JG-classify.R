@@ -102,11 +102,25 @@ for(tvar in variaveis_resp)
 g <- data_roc_all %>%
   ggplot()+
   geom_line(aes(x = espec, y = sens, color = method), size = 1.2)+
-  xlab("1-Especificidade")+
-  ylab("Sensibilidade")+
+  xlab("1-Specificity")+
+  ylab("Sensitivity")+
   geom_abline(size = 1.2)+
   facet_wrap( ~ variable, ncol = 4)
 ggsave("../plots/amparo-analise-JG-classify.pdf", height = 17, width = 14)
+
+#Curva ROC artigo
+data_roc_all %<>% 
+  filter(variable=="best_lim") %>%
+  filter(method=="GLMNET" | method=="MOCA")
+data_roc_all$method[data_roc_all$method == "GLMNET"] <- "GG"
+g <- data_roc_all %>%
+  ggplot()+
+  geom_line(aes(x = espec, y = sens, color = method), size = 1.2)+
+  xlab("1-Specificity")+
+  ylab("Sensitivity")+
+  geom_abline(size = 1.2)+
+  facet_wrap( ~ variable, ncol = 4)
+ggsave("../plots/amparo-analise-JG-classify-art.jpg", height = 17, width = 14)
 
 ## Zona em testes
 #Floresta aleatória

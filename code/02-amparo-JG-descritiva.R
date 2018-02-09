@@ -40,10 +40,24 @@ data %<>% inner_join(estagios, by = "new_playid")
 stan_param <- stan_info$param %>%
   mutate(escolaridade = as.factor(escolaridade),
          id           = as.factor(id),
-         hy           = as.factor(hy))
+         hy           = as.factor(hy)) %>% 
+  as.tibble()
 
-stan_param %>% ggplot(aes(x = id, y = gamma_m, fill = hy))+
-               geom_boxplot()
+##########################################################
+##Curiosidade se os parametros tem distribuicao bimodal ##
+##########################################################
+#stan_param %>% 
+#  ggplot(aes(x = beta_m, fill = id))+
+#  geom_density()
+
+#stan_param %>% 
+#  ggplot(aes(x = beta_m, y=gamma_m, colour=id))+
+#  geom_point()+
+#  geom_smooth(method='lm', formula = gamma_m~stan_param$beta_m)
+
+stan_param %>% 
+  ggplot(aes(x = id, y = gamma_m, fill = hy))+
+  geom_boxplot()
 ggsave("../plots/amparo-stan-hy.pdf")
 dev.off()
 

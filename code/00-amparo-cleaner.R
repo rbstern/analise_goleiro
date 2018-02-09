@@ -75,6 +75,10 @@ labels_clean <- labels %>%
          best_lim, best_marcha, best_orient, best_reat, best_rest, best_trans, best_tot,
          updrs_post, updrs_rig, updrs_trem, updrs_tot)
 
+table_hy <- labels_clean$hy %>% 
+  table()
+table_hy[-1] %>% sum()
+
 data <- inner_join(data, labels_clean, by="playeralias")
 write.csv(data, "../data/amparo/data.csv")
 #não rodar por sigilo do DB
