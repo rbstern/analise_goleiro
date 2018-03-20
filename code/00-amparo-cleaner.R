@@ -9,7 +9,7 @@ rm_accent_from_names <- function(dt)
   invisible(dt)
 }
 
-data <- read_csv("../data-raw/amparo/amparo.csv") %>%
+data <- read.csv("./data-raw/amparo/amparo.csv") %>%
   as.tibble() %>%
   rm_accent_from_names() %>%
   clean_names()
@@ -35,7 +35,7 @@ data %<>%
   group_by(id_alias_fct) %>%
   mutate(cum_mean = cumsum(acertou_lgl)/(1:n()))
 
-labels <- read_csv("../data-raw/amparo/labels.csv") %>%
+labels <- read_csv("./data-raw/amparo/labels.csv") %>%
   as.tibble() %>%
   rm_accent_from_names() %>%
   clean_names() %>%
@@ -80,12 +80,34 @@ table_hy <- labels_clean$hy %>%
 table_hy[-1] %>% sum()
 
 data <- inner_join(data, labels_clean, by="playeralias")
-write.csv(data, "../data/amparo/data.csv")
-#não rodar por sigilo do DB
+write.csv(data, "./data/amparo/data.csv")
+#nao rodar por sigilo do DB
 #saveRDS(data, "../data/amparo/data.rds")
 
-#not ready
-#labels_clean_dt <- labels %>%
-#  mutate(moca_tot <- moca_total,
-#         n_pal <- palavras_bl_30,
-#         d_pas <- x30_ts)
+
+#Dupla tarefa
+dt <- read_csv("./data-raw/amparo/dt.csv") %>%
+  as.tibble() %>%
+  rm_accent_from_names() %>%
+  clean_names() %>%
+  mutate(idad         = as.numeric(idad),
+         sexo         = as.factor(sexo),
+         hy           = hy %>% as.numeric %% 4,
+         hy           = ifelse(is.na(hy), 0, hy),
+         escol        = rm_accent(escol),
+         escolaridade = 1+grepl("Medio", escol)+
+           2*grepl("Superior", escol),
+         moca_tot     = as.numeric(moca_total),
+         x30s_dist_td = as.numeric(x30_fv),
+         x30s_dist_ts = as.numeric(x30_ts),
+         x30s_fv_td   = as.numeric(pal_dt_30),
+         x30s_fv_ts   = as.numeric(bl_30),
+         x10m_dist_td = as.numeric(x10m_fv),
+         x10m_dist_ts = as.numeric(x10m_ts),
+         x10m_fv_td   = as.numeric(pal_dt_10m),
+         x10m_fv_ts   = (x10m_dist_td * x30s_fv_ts)/30,
+         idx_1_x30s   = ((x30s_dist_td*x30s_fv_td)-(x30s_dist_ts*x30s_fv_ts))/sqrt(x30s_dist_ts*x30s_fv_ts),
+         idx_1_x10m   = ((x10m_dist_td*x10m_fv_td)-(x10m_dist_ts*x10m_fv_ts))/sqrt(x10m_dist_ts*x10m_fv_ts)
+         )
+
+write.csv(dt, "./data/amparo/dt.csv")

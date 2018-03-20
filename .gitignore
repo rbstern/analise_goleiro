@@ -19,3 +19,4 @@ data.rds
 *.snm
 *.synctex
 *.toc
+.Rproj.user

@@ -1,121 +1,61 @@
-library(boot)
-library(glmnet)
-library(magrittr)
-library(rpart)
-library(ROCR)
-library(rstan)
+######################################################
+## Esta se√ß√£o ainda est√° extremamente experimental. ##
+######################################################
+
+library(ordinal)
 library(tidyverse)
 
-db_class <- readRDS("../data/amparo/amparo-JG-data-classify.rds")
-db_gol <- db_class$db_gol
-variaveis_expl <- db_class$variaveis_expl
-variaveis_resp <- db_class$variaveis_resp
-db_gol2 <- db_gol %>% na.omit
+dt = "../data/amparo/dt.csv" %>% 
+  read.csv() %>%
+  as.tibble() %>%
+  filter(hy != 0) %>%
+  mutate(hy = as.ordered(hy),
+         custo_x30s_dist = (x30s_dist_ts - x30s_dist_td)/x30s_dist_ts,
+         custo_x30s_fv = (x30s_fv_ts - x30s_fv_td)/x30s_fv_ts,
+         custo_x10m_dist = (x10m_dist_ts - x10m_dist_td)/x10m_dist_ts,
+         custo_x10m_fv = (x10m_fv_ts - x10m_fv_td)/x10m_fv_ts,
+         idx_1 = ((x30s_dist_td*x30s_fv_td)-(x30s_dist_ts*x30s_fv_ts))/sqrt(x30s_dist_ts*x30s_fv_ts), 
+         idx_2 = ((x10m_dist_td*x10m_fv_td)-(x10m_dist_ts*x10m_fv_ts))/sqrt(x10m_dist_ts*x10m_fv_ts)) %>%
+  na.omit()
 
-expl_form <- paste(variaveis_expl, collapse="+")
+dt %>% 
+  filter(custo_x10m_dist > -2) %>%
+  ggplot(aes(x=idx_2, y=custo_x10m_dist))+
+  geom_point()+
+  geom_smooth(method='lm',formula=y~x)
 
-#Regressao logistica (glm)
-theme = theme_set(theme_minimal(base_size = 26))
-theme = theme_update(legend.position="top")
+formula = hy ~ custo_x30s_dist*custo_x30s_fv
+formula = hy ~ custo_x10m_dist*custo_x10m_fv
+om_custos = clm(formula, data = dt)
+preds = predict(om_custos, type="class")$fit
+mean(as.numeric(dt$hy) == as.numeric(preds))
 
-data_roc_all <- NULL
-for(tvar in variaveis_resp)
-{
-  db_gol_u <- db_gol
-  if(db_gol[[tvar]] %>% is.na %>% sum) { db_gol_u <- db_gol2 }
-  formula <- tvar %>% paste("~", expl_form, sep = "") %>% as.formula()
-  k <- nrow(db_gol_u)
-  predictions <- rep(NA, k)
-  for(i in 1:k) {
-    model <- glm(formula, family = binomial, data = db_gol_u[-i,])
-    predictions[i] <- predict(model, newdata = db_gol_u[i, , drop=F])
-  }
-  roc <- prediction(predictions, db_gol_u[[tvar]])
-  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
-  data_roc <- tibble("espec"    = roc@x.values[[1]],
-                     "sens"     = roc@y.values[[1]],
-                     "variable" = tvar,
-                     "method"   = "GLM")
-  data_roc_all %<>% rbind(data_roc)
-}
+dt %>% ggplot(aes(x=custo_x30s_dist, y=custo_x30s_fv, color=idx_1))+
+  geom_point()
 
-# Regressao logistica usando glmnet
-for(tvar in variaveis_resp)
-{
-  db_gol_u <- db_gol
-  if(db_gol[[tvar]] %>% is.na() %>% sum()) { db_gol_u <- db_gol2 }
-  x= db_gol_u %>% select(variaveis_expl) %>% as.matrix()
-  y= db_gol_u %>% select(tvar) %>% as.matrix() %>% as.factor()
-  aux <- cv.glmnet(x, y, family = "binomial",
-                   keep = TRUE, nfolds=nrow(db_gol_u))
-  i <- which(aux$lambda == aux$lambda.min)
-  # coeficientes:
-  coefficients(aux, s = aux$lambda.min)
+dt_1 = tibble(hy=dt$hy, idx=dt$idx_1, num=1) %>% na.omit()
+dt_2 = tibble(hy=dt$hy, idx=dt$idx_2, num=2) %>% na.omit()
+dt_ = rbind(dt_1, dt_2) %>% mutate(num = as.factor(num))
 
-  roc <- prediction(aux$fit.preval[,i], db_gol_u[[tvar]])
-  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
-  data_roc <- tibble("espec"    = roc@x.values[[1]],
-                     "sens"     = roc@y.values[[1]],
-                     "variable" = tvar,
-                     "method"   = "GLMNET")
-  data_roc_all %<>% rbind(data_roc)
-}
 
-# MOCA
-for(tvar in variaveis_resp)
-{
-  db_gol_u <- db_gol
-  if(db_gol[[tvar]] %>% is.na() %>% sum()) { db_gol_u <- db_gol2 }
-  
-  roc <- prediction(db_gol_u$moca_tot_scale, db_gol_u[[tvar]])
-  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
-  data_roc <- tibble("espec"    = roc@x.values[[1]],
-                     "sens"     = roc@y.values[[1]],
-                     "variable" = tvar,
-                     "method"   = "MOCA")
-  data_roc_all %<>% rbind(data_roc)
-}
+om_idx_1 = clm(hy ~ idx_1, data = dt)
+preds = predict(om_idx_1, type="class")$fit
+mean(as.numeric(dt$hy) == as.numeric(preds))
 
-#¡rvores de decis„o
-for(tvar in variaveis_resp)
-{
-  formula <- tvar %>% paste("~", expl_form, sep = "") %>% as.formula()
-  db_gol_u <- db_gol
-  if(db_gol[[tvar]] %>% is.na() %>% sum()) { db_gol_u <- db_gol2 }
-  k <- nrow(db_gol_u)
-  predictions <- rep(NA, k)
-  for(i in 1:k) {
-    model <- rpart(formula, data = db_gol_u[-i,], method = "class")
-    model %<>% prune(cp = model$cptable[which.min(aux$cptable[,"xerror"]), "CP"])
-    predictions[i] <- predict(model, newdata = db_gol_u[i, , drop=F])[2]
-  }
-  roc <- prediction(predictions, db_gol_u[[tvar]])
-  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
-  data_roc <- tibble("espec"    = roc@x.values[[1]],
-                     "sens"     = roc@y.values[[1]],
-                     "variable" = tvar,
-                     "method"   = "RPART")
-  data_roc_all %<>% rbind(data_roc)
-  }
+dt_1 = dt %>% 
+  select(hy, idx_1,
+         x30s_dist_ts, x30s_dist_td, x30s_fv_ts, x30s_fv_td, 
+         x10m_dist_ts, x10m_dist_td, x10m_fv_ts, x10m_fv_td) %>%
+  na.omit()
 
-#Curva ROC
-g <- data_roc_all %>%
-  ggplot()+
-  geom_line(aes(x = espec, y = sens, color = method), size = 1.2)+
-  xlab("1-Especificidade")+
-  ylab("Sensibilidade")+
-  geom_abline(size = 1.2)+
-  facet_wrap( ~ variable, ncol = 4)
-ggsave("../plots/amparo-analise-JG-classify.pdf", height = 17, width = 14)
+om_x30s = clm(hy ~ x30s_dist_ts + x30s_dist_td + x30s_fv_ts + x30s_fv_td, data = dt_1)
+preds = predict(om_x30s, type="class")$fit
+mean(as.numeric(dt_1$hy) == as.numeric(preds))
 
-## Zona em testes
-#Floresta aleatÛria
-#performance terrivel
-#expl2 <- dt.gol2 %>% select((expl %>% names)[-1])
-#aux <- randomForest(x=expl2, y=dt.gol2$best_marcha %>% as.factor)
-#rfcv(expl[,-1], resp2$best_tot %>% as.factor)$error.cv
+om_x30s_2 = clm(hy ~ idx_1, data = dt_1)
+preds = predict(om_x30s_2, type="class")$fit
+mean(as.numeric(dt_1$hy) == as.numeric(preds))
 
-#¡rvore de decis„o
-formula <- paste("moca_abs~",
-                 variaveis.expl %>% paste(collapse="+"),sep="")
-
+om_x10m = clm(hy ~ x10m_dist_ts + x10m_dist_td + x10m_fv_ts + x10m_fv_td, data = dt_1)
+preds = predict(om_x10m, type="class")$fit
+mean(as.numeric(dt_1$hy) == as.numeric(preds))
