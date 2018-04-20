@@ -76,7 +76,7 @@ for(tvar in variaveis_resp)
   data_roc_all %<>% rbind(data_roc)
 }
 
-#Árvores de decisão
+#?rvores de decis?o
 for(tvar in variaveis_resp)
 {
   formula <- tvar %>% paste("~", expl_form, sep = "") %>% as.formula()
@@ -98,6 +98,9 @@ for(tvar in variaveis_resp)
   data_roc_all %<>% rbind(data_roc)
   }
 
+#write_rds(data_roc_all, "../data/amparo/amparo-JG-classify.rds")
+data_roc_all = read_rds("../data/amparo/amparo-JG-classify.rds")
+
 #Curva ROC
 g <- data_roc_all %>%
   ggplot()+
@@ -109,27 +112,27 @@ g <- data_roc_all %>%
 ggsave("../plots/amparo-analise-JG-classify.pdf", height = 17, width = 14)
 
 #Curva ROC artigo
-data_roc_all %<>% 
+data_roc_all %<>%
   filter(variable=="best_lim") %>%
   filter(method=="GLMNET" | method=="MOCA")
-data_roc_all$method[data_roc_all$method == "GLMNET"] <- "GG"
+data_roc_all$method[data_roc_all$method == "GLMNET"] <- "JG"
 g <- data_roc_all %>%
   ggplot()+
   geom_line(aes(x = espec, y = sens, color = method), size = 1.2)+
-  xlab("1-Specificity")+
-  ylab("Sensitivity")+
+  xlab("1-Especificidade")+
+  ylab("Sensitividade")+
   geom_abline(size = 1.2)+
   facet_wrap( ~ variable, ncol = 4)
 ggsave("../plots/amparo-analise-JG-classify-art.jpg", height = 17, width = 14)
 
 ## Zona em testes
-#Floresta aleatória
+#Floresta aleat?ria
 #performance terrivel
 #expl2 <- dt.gol2 %>% select((expl %>% names)[-1])
 #aux <- randomForest(x=expl2, y=dt.gol2$best_marcha %>% as.factor)
 #rfcv(expl[,-1], resp2$best_tot %>% as.factor)$error.cv
 
-#Árvore de decisão
+#?rvore de decis?o
 formula <- paste("moca_abs~",
                  variaveis.expl %>% paste(collapse="+"),sep="")
 

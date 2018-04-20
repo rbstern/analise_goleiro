@@ -6,7 +6,7 @@ library(tidyverse)
 #Em linux data.rds pode ser preferivel.
 data <- read.csv("../data/amparo/data.csv")
 
-#Análise descritiva de taxa de acerto.
+#Analise descritiva de taxa de acerto.
 aux <- data %>% 
   group_by(id_alias_fct) %>%
   do(plots = ggplot(data=., aes(x = move, y = cum_mean))+
@@ -16,7 +16,7 @@ pdf("../plots/amparo-cum_mean.pdf")
 aux$plots
 dev.off()
 
-#Análise descritiva de taxa de tempo até decisão.
+#Analise descritiva de taxa de tempo ate decisao.
 aux <- data %>% 
        filter(move != 1) %>%
        group_by(id_alias_fct) %>%
@@ -30,7 +30,7 @@ aux$plots
 dev.off()
 
 ####################################################
-# Análise descritiva das covariáveis obtidas no JG #
+# Analise descritiva das covariaveis obtidas no JG #
 ####################################################
 
 stan_info <- readRDS("../data/amparo/amparo-JG-stan-data.rds")
@@ -88,11 +88,11 @@ aux2
 dev.off()
 
 ###################################
-# Ainda não finalizado            #
+# Ainda n?o finalizado            #
 ###################################
 ##Analise tempo~move por jogador  #
-##Regressão Linear                #
-##Possível cov extra?             #
+##Regress?o Linear                #
+##Poss?vel cov extra?             #
 ###################################
 #coefs <- data %>% 
 #  filter(move != 1) %>%
