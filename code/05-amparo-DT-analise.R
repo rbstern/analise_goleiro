@@ -5,18 +5,24 @@
 library(ordinal)
 library(tidyverse)
 
-dt = "./data/amparo/dt.csv" %>% 
-  read.csv() %>%
+#################################################
+## Calculo de custos e verificacao de indices. ##
+#################################################
+dt = read.csv("./data/amparo/dt.csv") %>%
   as.tibble() %>%
-  filter(hy != 0) %>%
   mutate(hy = as.ordered(hy),
          custo_x30s_dist = (x30s_dist_ts - x30s_dist_td)/x30s_dist_ts,
-         custo_x30s_fv = (x30s_fv_ts - x30s_fv_td)/x30s_fv_ts,
-         custo_x10m_dist = (x10m_dist_ts - x10m_dist_td)/x10m_dist_ts,
-         custo_x10m_fv = (x10m_fv_ts - x10m_fv_td)/x10m_fv_ts,
-         idx_1 = ((x30s_dist_td*x30s_fv_td)-(x30s_dist_ts*x30s_fv_ts))/sqrt(x30s_dist_ts*x30s_fv_ts), 
-         idx_2 = ((x10m_dist_td*x10m_fv_td)-(x10m_dist_ts*x10m_fv_ts))/sqrt(x10m_dist_ts*x10m_fv_ts)) %>%
-  na.omit()
+         custo_x30s_fv = (x30s_fv_ts - x30s_fv_td)/x30s_fv_ts)
+
+# Indice simples confirma ME.
+dt %>%
+  ggplot(aes(x = custo_x30s_dist, y = custo_x30s_fv, color = x30s_idx_1)) +
+  geom_point()
+
+# Modelo ainda está péssimo.
+dt %>%
+  ggplot(aes(x = custo_x30s_dist, y = custo_x30s_fv, color = x30s_idx_2)) +
+  geom_point()
 
 #########################################################
 ### 1. Estudo de dupla tarefa com spectral clustering ###
@@ -113,55 +119,22 @@ cluster_frame_idx %>%
   ggplot(aes(x = PC1, y = PC2, colour = cluster_5)) +
   geom_point()
 
-# a. Grafico de radar.
-# b. Desenvolvimento do indice.
+######################################
+### Tentativas de modelagem usando ###
+###  regressao logistica ordinal   ###
+######################################
 
-##########################################
-### Tentativas falhas de modelagem     ###
-### usando regressao logistica ordinal ###
-##########################################
-# dt %>% 
-#   ggplot(aes(x = custo_x30s_dist, y = custo_x30s_fv, colour = idx_1)) +
-#   geom_point()
-# 
-# dt %>% 
-#   filter(custo_x10m_dist > -2) %>%
-#   ggplot(aes(x=idx_2, y=custo_x10m_dist))+
-#   geom_point()+
-#   geom_smooth(method='lm',formula=y~x)
-# 
-# formula = hy ~ custo_x30s_dist*custo_x30s_fv
-# formula = hy ~ custo_x10m_dist*custo_x10m_fv
-# om_custos = clm(formula, data = dt)
-# preds = predict(om_custos, type="class")$fit
-# mean(as.numeric(dt$hy) == as.numeric(preds))
-# 
-# dt %>% ggplot(aes(x=custo_x30s_dist, y=custo_x30s_fv, color=idx_1))+
-#   geom_point()
-# 
-# dt_1 = tibble(hy=dt$hy, idx=dt$idx_1, num=1) %>% na.omit()
-# dt_2 = tibble(hy=dt$hy, idx=dt$idx_2, num=2) %>% na.omit()
-# dt_ = rbind(dt_1, dt_2) %>% mutate(num = as.factor(num))
-# 
-# 
-# om_idx_1 = clm(hy ~ idx_1, data = dt)
-# preds = predict(om_idx_1, type="class")$fit
-# mean(as.numeric(dt$hy) == as.numeric(preds))
-# 
-# dt_1 = dt %>% 
-#   select(hy, idx_1,
-#          x30s_dist_ts, x30s_dist_td, x30s_fv_ts, x30s_fv_td, 
-#          x10m_dist_ts, x10m_dist_td, x10m_fv_ts, x10m_fv_td) %>%
-#   na.omit()
-# 
-# om_x30s = clm(hy ~ x30s_dist_ts + x30s_dist_td + x30s_fv_ts + x30s_fv_td, data = dt_1)
-# preds = predict(om_x30s, type="class")$fit
-# mean(as.numeric(dt_1$hy) == as.numeric(preds))
-# 
-# om_x30s_2 = clm(hy ~ idx_1, data = dt_1)
-# preds = predict(om_x30s_2, type="class")$fit
-# mean(as.numeric(dt_1$hy) == as.numeric(preds))
-# 
-# om_x10m = clm(hy ~ x10m_dist_ts + x10m_dist_td + x10m_fv_ts + x10m_fv_td, data = dt_1)
-# preds = predict(om_x10m, type="class")$fit
-# mean(as.numeric(dt_1$hy) == as.numeric(preds))
+formula = hy ~ custo_x30s_dist*custo_x30s_fv
+om_custos = clm(formula, data = dt)
+preds = predict(om_custos, type="class")$fit
+mean(as.numeric(dt$hy) == as.numeric(preds))
+mean(abs(as.numeric(dt$hy) - as.numeric(preds)) <= 1)
+
+new_dt = dt_pca$x %>% 
+  as.tibble() %>%
+  mutate(hy = dt$hy)
+formula = hy ~ PC1 + PC2 + PC3 + PC4
+om_custos = clm(formula, data = new_dt)
+preds = predict(om_custos, type="class")$fit
+mean(as.numeric(dt$hy) == as.numeric(preds))
+mean(abs(as.numeric(dt$hy) - as.numeric(preds)) <= 1)

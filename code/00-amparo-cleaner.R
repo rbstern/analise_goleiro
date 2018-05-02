@@ -90,24 +90,27 @@ dt <- read_csv("./data-raw/amparo/dt.csv") %>%
   as.tibble() %>%
   rm_accent_from_names() %>%
   clean_names() %>%
-  mutate(idad         = as.numeric(idad),
-         sexo         = as.factor(sexo),
-         hy           = hy %>% as.numeric %% 4,
-         hy           = ifelse(is.na(hy), 0, hy),
-         escol        = rm_accent(escol),
-         escolaridade = 1+grepl("Medio", escol)+
-           2*grepl("Superior", escol),
-         moca_tot     = as.numeric(moca_total),
-         x30s_dist_td = as.numeric(x30_fv),
-         x30s_dist_ts = as.numeric(x30_ts),
-         x30s_fv_td   = as.numeric(pal_dt_30),
-         x30s_fv_ts   = as.numeric(bl_30),
-         x10m_dist_td = as.numeric(x10m_fv),
-         x10m_dist_ts = as.numeric(x10m_ts),
-         x10m_fv_td   = as.numeric(pal_dt_10m),
-         x10m_fv_ts   = (x10m_dist_td * x30s_fv_ts)/30,
-         idx_1_x30s   = ((x30s_dist_td*x30s_fv_td)-(x30s_dist_ts*x30s_fv_ts))/sqrt(x30s_dist_ts*x30s_fv_ts),
-         idx_1_x10m   = ((x10m_dist_td*x10m_fv_td)-(x10m_dist_ts*x10m_fv_ts))/sqrt(x10m_dist_ts*x10m_fv_ts)
-         )
-
+  mutate(hy           = ifelse(is.na(hy), 0, hy),
+         hy           = ifelse(grepl("(-)", hy), 0, hy),
+         hy           = round(as.numeric(hy)) %% 4,
+         escolaridade = rm_accent(escolaridade),
+         escolaridade = 1 + grepl("Medio", escolaridade) +
+                        2 * grepl("Superior", escolaridade),
+         moca         = as.numeric(moca),
+         x30s_dist_td = as.numeric(marcha_em_tarefa_dupla_distancia),
+         x30s_dist_ts = as.numeric(marcha_em_tarefa_simple_distancia),
+         x30s_fv_td   = as.numeric(numero_de_palavras_em_tarefa_dupla_distancia),
+         x30s_fv_ts   = as.numeric(numero_de_palavras_em_tarefa_simples_sentado),
+         x30s_idx_1   = ((x30s_dist_td*x30s_fv_td)-(x30s_dist_ts*x30s_fv_ts))/sqrt(x30s_dist_ts*x30s_fv_ts),
+         n1           = x30s_dist_ts,
+         n2           = x30s_fv_ts,
+         n31          = x30s_dist_td,
+         n32          = x30s_fv_td,
+         x30s_idx_2   = 1/(1 + (n31/(n31+n32))^(-n31) * 
+                             (n32/(n31+n32))^(-n32) *
+                             exp(-(n2-n1)*((n1*n31-n2*n32)/(n1*n31+n2*n32))))
+         ) %>%
+  select(idade, genero, escolaridade, hy, moca, 
+         x30s_dist_td, x30s_dist_ts, x30s_fv_td, x30s_fv_ts,
+         x30s_idx_1, x30s_idx_2)
 write.csv(dt, "./data/amparo/dt.csv")
