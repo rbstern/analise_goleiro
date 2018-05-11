@@ -2,21 +2,26 @@
 ## Esta seção ainda está extremamente experimental. ##
 ######################################################
 
+# Entender o que é a reta entre PC1 e PC2.
+
 library(ordinal)
+library(randomForest)
 library(tidyverse)
+
 
 #################################################
 ## Calculo de custos e verificacao de indices. ##
 #################################################
 dt = read.csv("./data/amparo/dt.csv") %>%
   as.tibble() %>%
+  filter(moca >= 23) %>%
   mutate(hy = as.ordered(hy),
          custo_x30s_dist = (x30s_dist_ts - x30s_dist_td)/x30s_dist_ts,
          custo_x30s_fv = (x30s_fv_ts - x30s_fv_td)/x30s_fv_ts)
 
 # Indice simples confirma ME.
 dt %>%
-  ggplot(aes(x = custo_x30s_dist, y = custo_x30s_fv, color = x30s_idx_1)) +
+  ggplot(aes(x = custo_x30s_dist, y = custo_x30s_fv, color = hy)) +
   geom_point()
 
 # Modelo ainda está péssimo.
@@ -124,17 +129,77 @@ cluster_frame_idx %>%
 ###  regressao logistica ordinal   ###
 ######################################
 
+## BD inteiro
+
 formula = hy ~ custo_x30s_dist*custo_x30s_fv
 om_custos = clm(formula, data = dt)
 preds = predict(om_custos, type="class")$fit
 mean(as.numeric(dt$hy) == as.numeric(preds))
-mean(abs(as.numeric(dt$hy) - as.numeric(preds)) <= 1)
+
+formula = hy ~ custo_x30s_dist
+om_custos = clm(formula, data = dt)
+preds = predict(om_custos, type="class")$fit
+mean(as.numeric(dt$hy) == as.numeric(preds))
+
+formula = hy ~ custo_x30s_fv
+om_custos = clm(formula, data = dt)
+preds = predict(om_custos, type="class")$fit
+mean(as.numeric(dt$hy) == as.numeric(preds))
+
+## HY <= 1
+
+dt_mod = dt %>%
+  filter(hy <= 1) %>%
+  mutate(tot = (custo_x30s_fv+custo_x30s_dist)/2)
+
+formula = hy ~ custo_x30s_dist*custo_x30s_fv
+om_custos = clm(formula, data = dt_mod)
+preds = predict(om_custos, type="class")$fit
+mean(as.numeric(dt_mod$hy) == as.numeric(preds))
+
+formula = hy ~ custo_x30s_dist
+om_custos = clm(formula, data = dt_mod)
+preds = predict(om_custos, type="class")$fit
+mean(as.numeric(dt_mod$hy) == as.numeric(preds))
+
+formula = hy ~ custo_x30s_fv
+om_custos = clm(formula, data = dt_mod)
+preds = predict(om_custos, type="class")$fit
+mean(as.numeric(dt_mod$hy) == as.numeric(preds))
+
+formula = hy ~ tot
+om_custos = clm(formula, data = dt_mod)
+preds = predict(om_custos, type="class")$fit
+mean(as.numeric(dt_mod$hy) == as.numeric(preds))
 
 new_dt = dt_pca$x %>% 
   as.tibble() %>%
-  mutate(hy = dt$hy)
+  mutate(hy = dt$hy) %>%
+  filter(hy <= 1)
 formula = hy ~ PC1 + PC2 + PC3 + PC4
 om_custos = clm(formula, data = new_dt)
 preds = predict(om_custos, type="class")$fit
-mean(as.numeric(dt$hy) == as.numeric(preds))
-mean(abs(as.numeric(dt$hy) - as.numeric(preds)) <= 1)
+mean(as.numeric(new_dt$hy) == as.numeric(preds))
+
+# Floresta aleatoria
+dt_mod_2 = dt %>% 
+  mutate(hy = as.factor(as.character(hy)),
+         hy = as.factor(hy != 0)) %>%
+  select(-X, -genero, -idade, -escolaridade, -x30s_idx_1, -x30s_idx_2)
+formula = hy ~ .
+randomForest(formula, data = dt_mod_2)
+
+dt_mod_2 = dt %>% 
+  mutate(hy = as.factor(as.character(hy)),
+         hy = as.factor(hy != 0)) %>%
+  select(-X, -genero, -idade, -escolaridade, -x30s_idx_1, -x30s_idx_2
+         -x30s_fv_td, -x30s_fv_ts, -custo_x30s_fv)
+formula = hy ~ .
+randomForest(formula, data = dt_mod_2)
+
+dt_mod_2 = dt %>% 
+  mutate(hy = as.factor(as.character(hy)),
+         hy = as.factor(hy != 0)) %>%
+  select(hy, x30s_dist_td, x30s_dist_ts, x30s_fv_td, x30s_fv_ts, moca)
+formula = hy ~ .
+randomForest(formula, data = dt_mod_2)

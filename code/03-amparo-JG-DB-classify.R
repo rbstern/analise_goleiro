@@ -3,10 +3,10 @@ library(tidyverse)
 
 #Carregar BD
 #Em linux data.rds pode ser preferivel.
-data <- read.csv("../data/amparo/data.csv")
+data <- read.csv("./data/amparo/data.csv")
 
-#Variáveis explicativas
-stan_info <- readRDS("../data/amparo/amparo-JG-stan-data.rds")
+#Vari?veis explicativas
+stan_info <- readRDS("./data/amparo/amparo-JG-stan-data.rds")
 estagios <- stan_info$estagios
 data %<>% inner_join(estagios, by = "new_playid")
 
@@ -38,8 +38,22 @@ expl <- aux1 %>%
   inner_join(aux2, by = "alias") %>% 
   inner_join(aux3, by = "alias") %>%
   inner_join(extras, by = "alias")
-expl_has_na <- (expl %>% is.na() %>% rowMeans() > 0) %>% which
+expl_has_na <- (expl %>% is.na() %>% rowMeans() > 0) %>% which()
 expl <- expl[-expl_has_na,]
+
+# Consolidacao de variaveis por paciente.
+patients = read.csv("./data-raw/amparo/patients.csv") %>%
+  mutate(COD_ = as.character(COD_))
+data %>% 
+  select(alias, player_alias) %>%
+  distinct(alias, player_alias, .keep_all = TRUE) %>%
+  right_join(expl, by = "alias") %>% 
+  select(-alias) %>% 
+  mutate(player_alias = as.character(player_alias)) %>%
+  right_join(patients, by = c("player_alias" = "COD_")) %>%
+  arrange(player_alias) %>%
+  rename(COD_ = player_alias) %>%
+  write.csv("./data/amparo/patients.csv")
 
 #Variaveis resposta
 resp <- data %>%
