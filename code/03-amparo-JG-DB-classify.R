@@ -53,6 +53,7 @@ data %>%
   right_join(patients, by = c("player_alias" = "COD_")) %>%
   arrange(player_alias) %>%
   rename(COD_ = player_alias) %>%
+  as.tibble() %>%
   write.csv("./data/amparo/patients.csv")
 
 #Variaveis resposta
@@ -95,9 +96,9 @@ resp2 <- resp %>%
 
 #BD final
 db_gol <- inner_join(expl, resp2, by = "alias")[,-1]
-variaveis_resp <- (resp2 %>% names)[-(1:2)]
+variaveis_resp <- names(resp2)[-(1:2)]
 variaveis_resp <- variaveis_resp[variaveis_resp != "moca_tot_scale"]
-variaveis_expl <- (expl %>% names)[-1]
+variaveis_expl <- names(expl)[-1]
 db_class <- list(db_gol         = db_gol,
                  variaveis_expl = variaveis_expl,
                  variaveis_resp = variaveis_resp)

@@ -1,3 +1,4 @@
+library(abjutils)
 library(boot)
 library(glmnet)
 library(magrittr)
@@ -6,8 +7,9 @@ library(ROCR)
 library(rstan)
 library(tidyverse)
 
-db_class <- readRDS("../data/amparo/amparo-JG-data-classify.rds")
+db_class <- readRDS("./data/amparo/amparo-JG-data-classify.rds")
 db_gol <- db_class$db_gol
+db_gol <- as.tibble(db_gol)
 variaveis_expl <- db_class$variaveis_expl
 variaveis_resp <- db_class$variaveis_resp
 db_gol2 <- db_gol %>% na.omit
@@ -28,7 +30,7 @@ for(tvar in variaveis_resp)
   predictions <- rep(NA, k)
   for(i in 1:k) {
     model <- glm(formula, family = binomial, data = db_gol_u[-i,])
-    predictions[i] <- predict(model, newdata = db_gol_u[i, , drop=F])
+    predictions[i] <- predict(model, newdata = db_gol_u[i, , drop = F])
   }
   roc <- prediction(predictions, db_gol_u[[tvar]])
   roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
@@ -76,7 +78,7 @@ for(tvar in variaveis_resp)
   data_roc_all %<>% rbind(data_roc)
 }
 
-#?rvores de decis?o
+#Arvores de decisao
 for(tvar in variaveis_resp)
 {
   formula <- tvar %>% paste("~", expl_form, sep = "") %>% as.formula()
@@ -135,4 +137,109 @@ ggsave("../plots/amparo-analise-JG-classify-art.jpg", height = 17, width = 14)
 #?rvore de decis?o
 formula <- paste("moca_abs~",
                  variaveis.expl %>% paste(collapse="+"),sep="")
+
+### Nova rodada de classificacao
+dt = read.csv("./data-raw/amparo/completa.csv")
+names(dt) = str_to_lower(names(dt))
+dt %<>% 
+  mutate(tug_custo = (tug_st-tug_dt)/tug_st) %>%
+  mutate(escol_       = rm_accent(escol_),
+         escolaridade = 1+grepl("Medio", escol_) +
+           2*grepl("Superior", escol_),
+         custo_fv_30s = (bl_fv_30.-pal_dt_30.)/bl_fv_30.) %>%
+  as.tibble()
+
+variaveis_resp = c("dgi_", "tug_custo") #"tug_st", "tug_dt", )
+
+all_vars = c("moca_total", variaveis_resp, variaveis_expl)
+dt %<>% 
+  select(all_vars) %>%
+  na.omit()
+
+for(tvar in variaveis_resp)
+{
+  t_median = median(dt[[tvar]])
+  prop_1 = abs(mean(dt[[tvar]] >= t_median) - 0.5)
+  prop_2 = abs(mean(dt[[tvar]] > t_median) - 0.5)
+  if(prop_1 < prop_2) dt[[tvar]] = dt[[tvar]] >= t_median
+  else dt[[tvar]] = dt[[tvar]] > t_median
+}
+
+variaveis_expl = variaveis_expl[1:9]
+data_roc_all = NULL
+data_acc_all = NULL
+# Regressao logistica usando glmnet
+for(tvar in variaveis_resp)
+{
+  db_gol = dt
+  x = db_gol %>% select(variaveis_expl) %>% as.matrix()
+  y = db_gol %>% select(tvar) %>% as.matrix() %>% as.factor()
+  aux <- cv.glmnet(x, y, family = "binomial",
+                   keep = TRUE, nfolds=nrow(db_gol))
+  i <- which(aux$lambda == aux$lambda.min)
+  # coeficientes:
+  coefficients(aux, s = aux$lambda.min)
+  
+  roc <- prediction(aux$fit.preval[,i], db_gol[[tvar]])
+  t_acc = max(roc@tp[[1]] + roc@tn[[1]])
+  t_n = max(roc@tp[[1]] + roc@tn[[1]] + roc@fp[[1]] + roc@fn[[1]])
+  
+  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
+  data_roc <- tibble("espec"    = roc@x.values[[1]],
+                     "sens"     = roc@y.values[[1]],
+                     "variable" = tvar,
+                     "covariate"   = "GG")
+  data_roc_all %<>% rbind(data_roc)
+  data_acc = tibble(
+    acc = t_acc/t_n,
+    variable = tvar,
+    covariate = "GG"
+  )
+  data_acc_all %<>% rbind(data_acc)
+}
+
+for(tvar in variaveis_resp)
+{
+  db_gol = dt
+  roc <- prediction(db_gol$moca_total, db_gol[[tvar]])
+  t_acc = max(roc@tp[[1]]+roc@tn[[1]])
+  t_n = max(roc@tp[[1]]+roc@tn[[1]]+roc@fp[[1]]+roc@fn[[1]])
+  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
+  data_roc <- tibble("espec"    = roc@x.values[[1]],
+                     "sens"     = roc@y.values[[1]],
+                     "variable" = tvar,
+                     "covariate"   = "MOCA")
+  data_roc_all %<>% rbind(data_roc)
+  data_acc = tibble(
+    acc = t_acc/t_n,
+    variable = tvar,
+    covariate = "MOCA"
+  )
+  data_acc_all %<>% rbind(data_acc)
+}
+
+#Curva ROC
+g <- data_roc_all %>%
+  filter(variable == "dgi_") %>%
+  ggplot()+
+  geom_line(aes(x = espec, y = sens, color = covariate), size = 1.2)+
+  xlab("1-Specificity")+
+  ylab("Sensitivity")+
+  geom_abline(size = 1.2)#+
+  #ggtitle("ROC (receiver operator characteristic) curves for 
+  #        predicting DGI using the classifiers
+  #        adjusted with either GG variables or MoCA score")
+ggsave("./plots/amparo-analise-JG-classify-dgi.pdf", height = 17, width = 14)
+
+g <- data_roc_all %>%
+  filter(variable == "tug_custo") %>%
+  ggplot()+
+  geom_line(aes(x = espec, y = sens, color = covariate), size = 1.2)+
+  xlab("1-Specificity")+
+  ylab("Sensitivity")+
+  geom_abline(size = 1.2)#+
+  #ggtitle("ROC (receiver operator characteristic) curves for 
+  #        predicting TUG cost using the classifiers
+  #        adjusted with either GG variables or MoCA score")
+ggsave("./plots/amparo-analise-JG-classify-tug-cost.pdf", height = 17, width = 14)
 

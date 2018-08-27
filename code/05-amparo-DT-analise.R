@@ -2,12 +2,14 @@
 ## Esta seção ainda está extremamente experimental. ##
 ######################################################
 
-# Entender o que é a reta entre PC1 e PC2.
-
+library(glmnet)
 library(ordinal)
 library(randomForest)
 library(tidyverse)
+library(magrittr)
 
+# Tarefas:
+# 1. Entender o que é a reta entre PC1 e PC2.
 
 #################################################
 ## Calculo de custos e verificacao de indices. ##
@@ -21,6 +23,7 @@ dt = read.csv("./data/amparo/dt.csv") %>%
 
 # Indice simples confirma ME.
 dt %>%
+  filter(hy <= 1) %>%
   ggplot(aes(x = custo_x30s_dist, y = custo_x30s_fv, color = hy)) +
   geom_point()
 
@@ -203,3 +206,92 @@ dt_mod_2 = dt %>%
   select(hy, x30s_dist_td, x30s_dist_ts, x30s_fv_td, x30s_fv_ts, moca)
 formula = hy ~ .
 randomForest(formula, data = dt_mod_2)
+
+#####################################
+### Comparar JG e MoCA em relação ###
+###      à previsão de DT         ###
+#####################################
+
+dt = read.csv("./data/amparo/completa.csv") %>%
+  as.tibble() %>%
+  select(custo_10m_fv = Cust_10M_FV_, 
+         custo_10m_cr = Cust_10M_CR_, # Medidas de performance em DT 10m.
+         custo_30s_cr = X30._CR_,
+         custo_30s_fv = X30._FV_,     
+         x10m_fv_ts = BL_30.,
+         x10m_fv_dt = Pal_DT_30.,     # Medidas de performance em DT 30s.
+         beta_3, beta_4, beta_7, 
+         gamma_3, gamma_4, gamma_7,
+         time_3, time_4, time_7,      # Medidas de performance em JG.
+         moca_tot = MoCA_TOTAL) %>%   # MoCA total.
+  mutate(custo_10m_fv = as.numeric(as.character(custo_10m_fv)), 
+         custo_10m_cr = as.numeric(as.character(custo_10m_cr)),
+         custo_30s_fv = as.numeric(as.character(custo_30s_fv)), 
+         custo_30s_cr = as.numeric(as.character(custo_30s_cr)),
+         custo_cog_30s_fv = (x10m_fv_ts-x10m_fv_dt)/x10m_fv_ts,
+         custo_total = (custo_30s_fv+custo_cog_30s_fv)/2) %>%
+  na.omit() %>%
+  mutate(cat_custo_10m_fv = custo_10m_fv >= median(custo_10m_fv),
+         cat_custo_10m_cr = custo_10m_cr >= median(custo_10m_cr),
+         cat_custo_30s_fv = custo_30s_fv >= median(custo_10m_fv),
+         cat_custo_30s_cr = custo_30s_cr >= median(custo_30s_cr))
+
+resp_vars = c("custo_10m_cr", "custo_10m_fv", "custo_30s_cr", "custo_30s_fv",
+              "custo_cog_30s_fv", "custo_total")
+jg_vars = c("beta_3", "beta_4", "beta_7", 
+            "gamma_3", "gamma_4", "gamma_7", 
+            "time_3", "time_4", "time_7")
+moca_vars = c("moca_tot")
+
+errors = NULL
+
+X = dt %>% select(jg_vars) %>% as.matrix()
+for(resp_var in resp_vars)
+{
+  Y = dt[[resp_var]] %>% as.matrix()
+  aux <- cv.glmnet(X, Y, keep = TRUE, nfolds = nrow(dt))
+  i <- which(aux$lambda == aux$lambda.min)
+  error = (aux$fit.preval[,i] - Y) %>% abs() %>% mean()
+  errors %<>% rbind(tibble(method = paste(resp_var, "JG", sep="_"), 
+                           error = error))
+}
+
+X = dt$moca_tot %>% as.matrix()
+X %<>% cbind(rep(1, nrow(X)))
+for(resp_var in resp_vars)
+{
+  Y = dt[[resp_var]] %>% as.matrix()
+  aux <- cv.glmnet(X, Y, keep = TRUE, nfolds = nrow(dt))
+  i <- which(aux$lambda == aux$lambda.min)
+  error = (aux$fit.preval[,i]-Y) %>% abs() %>% mean()
+  errors %<>% rbind(tibble(method = paste(resp_var, "MOCA", sep="_"), 
+                           error = error))
+}
+
+X[,1] = rnorm(nrow(X))
+for(resp_var in resp_vars)
+{
+  Y = dt[[resp_var]] %>% as.matrix()
+  aux <- cv.glmnet(X, Y, keep = TRUE, nfolds = nrow(dt))
+  i <- which(aux$lambda == aux$lambda.min)
+  error = (aux$fit.preval[,i]-Y) %>% abs() %>% mean()
+  errors %<>% rbind(tibble(method = paste(resp_var, "null", sep="_"), 
+                           error = error))
+}
+
+errors
+
+
+
+
+####
+
+dt = read.csv("./data/amparo/custos.csv") %>%
+  as.tibble() %>%
+  select(HY, custo.total, custo.motor, custo.cognitivo) %>%
+  filter(HY != 4) %>%
+  filter(HY != "")
+
+dt %>%
+  ggplot(aes(y = custo.cognitivo, x = HY)) +
+  geom_boxplot()
