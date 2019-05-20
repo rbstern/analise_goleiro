@@ -116,8 +116,6 @@ for(num_comp in num_comps)
 }
 acertos
 
-
-
 ###
 
 new_dt_2 = dt %>%
@@ -145,17 +143,3 @@ formula = hy_ ~ .
 om_custos = clm(formula, data = new_dt_2)
 preds = predict(om_custos, type = "class")$fit
 confusionMatrix(preds, as.factor(new_dt_2$hy_))
-
-
-
-
-
-
-
-
-###
-
-
-
-
-

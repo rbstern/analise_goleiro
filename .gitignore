@@ -1,8 +1,8 @@
 # Ignored files #
 #################
 
-#Dados
-*.csv
+#Data
+#*.csv - csv files made publicly available
 *.xlsx
 
 #R

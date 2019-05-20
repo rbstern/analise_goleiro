@@ -9,7 +9,7 @@ library(tidyverse)
 
 db_class <- readRDS("./data/amparo/amparo-JG-data-classify.rds")
 db_gol <- db_class$db_gol
-db_gol <- as.tibble(db_gol)
+db_gol <- as_tibble(db_gol)
 variaveis_expl <- db_class$variaveis_expl
 variaveis_resp <- db_class$variaveis_resp
 db_gol2 <- db_gol %>% na.omit
@@ -32,10 +32,12 @@ for(tvar in variaveis_resp)
     model <- glm(formula, family = binomial, data = db_gol_u[-i,])
     predictions[i] <- predict(model, newdata = db_gol_u[i, , drop = F])
   }
-  roc <- prediction(predictions, db_gol_u[[tvar]])
-  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
+  preds <- prediction(predictions, db_gol_u[[tvar]])
+  roc <- performance(preds, measure = "tpr", x.measure = "fpr")
+  auc <- performance(preds, measure = "auc")
   data_roc <- tibble("espec"    = roc@x.values[[1]],
                      "sens"     = roc@y.values[[1]],
+                     "auc"      = auc@y.values[[1]],
                      "variable" = tvar,
                      "method"   = "GLM")
   data_roc_all %<>% rbind(data_roc)
@@ -54,10 +56,12 @@ for(tvar in variaveis_resp)
   # coeficientes:
   coefficients(aux, s = aux$lambda.min)
 
-  roc <- prediction(aux$fit.preval[,i], db_gol_u[[tvar]])
-  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
+  preds <- prediction(aux$fit.preval[,i], db_gol_u[[tvar]])
+  roc <- performance(preds, measure = "tpr", x.measure = "fpr")
+  auc <- performance(preds, measure = "auc")
   data_roc <- tibble("espec"    = roc@x.values[[1]],
                      "sens"     = roc@y.values[[1]],
+                     "auc"      = auc@y.values[[1]],
                      "variable" = tvar,
                      "method"   = "GLMNET")
   data_roc_all %<>% rbind(data_roc)
@@ -69,39 +73,41 @@ for(tvar in variaveis_resp)
   db_gol_u <- db_gol
   if(db_gol[[tvar]] %>% is.na() %>% sum()) { db_gol_u <- db_gol2 }
   
-  roc <- prediction(db_gol_u$moca_tot_scale, db_gol_u[[tvar]])
-  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
+  preds <- prediction(db_gol_u$moca_tot_scale, db_gol_u[[tvar]])
+  roc <- performance(preds, measure = "tpr", x.measure = "fpr")
+  auc <- performance(preds, measure = "auc")
   data_roc <- tibble("espec"    = roc@x.values[[1]],
                      "sens"     = roc@y.values[[1]],
+                     "auc"      = auc@y.values[[1]],
                      "variable" = tvar,
                      "method"   = "MOCA")
   data_roc_all %<>% rbind(data_roc)
 }
 
 #Arvores de decisao
-for(tvar in variaveis_resp)
-{
-  formula <- tvar %>% paste("~", expl_form, sep = "") %>% as.formula()
-  db_gol_u <- db_gol
-  if(db_gol[[tvar]] %>% is.na() %>% sum()) { db_gol_u <- db_gol2 }
-  k <- nrow(db_gol_u)
-  predictions <- rep(NA, k)
-  for(i in 1:k) {
-    model <- rpart(formula, data = db_gol_u[-i,], method = "class")
-    model %<>% prune(cp = model$cptable[which.min(aux$cptable[,"xerror"]), "CP"])
-    predictions[i] <- predict(model, newdata = db_gol_u[i, , drop=F])[2]
-  }
-  roc <- prediction(predictions, db_gol_u[[tvar]])
-  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
-  data_roc <- tibble("espec"    = roc@x.values[[1]],
-                     "sens"     = roc@y.values[[1]],
-                     "variable" = tvar,
-                     "method"   = "RPART")
-  data_roc_all %<>% rbind(data_roc)
-  }
+# for(tvar in variaveis_resp)
+# {
+#   formula <- tvar %>% paste("~", expl_form, sep = "") %>% as.formula()
+#   db_gol_u <- db_gol
+#   if(db_gol[[tvar]] %>% is.na() %>% sum()) { db_gol_u <- db_gol2 }
+#   k <- nrow(db_gol_u)
+#   predictions <- rep(NA, k)
+#   for(i in 1:k) {
+#     model <- rpart(formula, data = db_gol_u[-i,], method = "class")
+#     model %<>% prune(cp = model$cptable[which.min(aux$cptable[,"xerror"]), "CP"])
+#     predictions[i] <- predict(model, newdata = db_gol_u[i, , drop=F])[2]
+#   }
+#   roc <- prediction(predictions, db_gol_u[[tvar]])
+#   roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
+#   data_roc <- tibble("espec"    = roc@x.values[[1]],
+#                      "sens"     = roc@y.values[[1]],
+#                      "variable" = tvar,
+#                      "method"   = "RPART")
+#   data_roc_all %<>% rbind(data_roc)
+#   }
 
-#write_rds(data_roc_all, "../data/amparo/amparo-JG-classify.rds")
-data_roc_all = read_rds("../data/amparo/amparo-JG-classify.rds")
+#write_rds(data_roc_all, "./data/amparo/amparo-JG-classify.rds")
+data_roc_all = read_rds("./data/amparo/amparo-JG-classify.rds")
 
 #Curva ROC
 g <- data_roc_all %>%
@@ -118,6 +124,7 @@ data_roc_all %<>%
   filter(variable=="best_lim") %>%
   filter(method=="GLMNET" | method=="MOCA")
 data_roc_all$method[data_roc_all$method == "GLMNET"] <- "JG"
+
 g <- data_roc_all %>%
   ggplot()+
   geom_line(aes(x = espec, y = sens, color = method), size = 1.2)+
@@ -125,37 +132,34 @@ g <- data_roc_all %>%
   ylab("Sensitividade")+
   geom_abline(size = 1.2)+
   facet_wrap( ~ variable, ncol = 4)
-ggsave("../plots/amparo-analise-JG-classify-art.jpg", height = 17, width = 14)
+ggsave("./plots/amparo-analise-JG-classify-art.jpg", height = 17, width = 14)
 
 ## Zona em testes
-#Floresta aleat?ria
+#Floresta aleatoria
 #performance terrivel
 #expl2 <- dt.gol2 %>% select((expl %>% names)[-1])
 #aux <- randomForest(x=expl2, y=dt.gol2$best_marcha %>% as.factor)
 #rfcv(expl[,-1], resp2$best_tot %>% as.factor)$error.cv
 
-#?rvore de decis?o
-formula <- paste("moca_abs~",
-                 variaveis.expl %>% paste(collapse="+"),sep="")
+#Arvore de decisao
+# formula <- paste("moca_abs~",
+#                  variaveis.expl %>% paste(collapse="+"),sep="")
 
-### Nova rodada de classificacao
-dt = read.csv("./data-raw/amparo/completa.csv")
+####################################################################
+## Nova rodada de classificacao                                   ##
+####################################################################
+variaveis_resp = c("dgi_", "tug_custo") #"tug_st", "tug_dt", )
+all_vars = c("moca_total", variaveis_resp, variaveis_expl)
+
+dt = read_csv("./data-raw/amparo/completa.csv")
 names(dt) = str_to_lower(names(dt))
 dt %<>% 
-  mutate(tug_custo = (tug_st-tug_dt)/tug_st) %>%
-  mutate(escol_       = rm_accent(escol_),
-         escolaridade = 1+grepl("Medio", escol_) +
-           2*grepl("Superior", escol_),
-         custo_fv_30s = (bl_fv_30.-pal_dt_30.)/bl_fv_30.) %>%
-  as.tibble()
-
-variaveis_resp = c("dgi_", "tug_custo") #"tug_st", "tug_dt", )
-
-all_vars = c("moca_total", variaveis_resp, variaveis_expl)
-dt %<>% 
-  select(all_vars) %>%
+  mutate(escol_ = rm_accent(escol_),
+         escolaridade = 1+grepl("Medio", escol_)+2*grepl("Superior", escol_),
+         tug_custo = (tug_st - tug_dt)/tug_st) %>% 
+  select(c("tug_custo", "dgi_", "moca_total", variaveis_expl)) %>%
   na.omit()
-
+  
 for(tvar in variaveis_resp)
 {
   t_median = median(dt[[tvar]])
@@ -171,21 +175,21 @@ data_acc_all = NULL
 # Regressao logistica usando glmnet
 for(tvar in variaveis_resp)
 {
-  db_gol = dt
-  x = db_gol %>% select(variaveis_expl) %>% as.matrix()
-  y = db_gol %>% select(tvar) %>% as.matrix() %>% as.factor()
+  x = dt %>% select(variaveis_expl) %>% as.matrix()
+  y = dt %>% select(tvar) %>% as.matrix() %>% as.factor()
   aux <- cv.glmnet(x, y, family = "binomial",
-                   keep = TRUE, nfolds=nrow(db_gol))
+                   keep = TRUE, nfolds=nrow(dt))
   i <- which(aux$lambda == aux$lambda.min)
   # coeficientes:
   coefficients(aux, s = aux$lambda.min)
   
-  roc <- prediction(aux$fit.preval[,i], db_gol[[tvar]])
-  t_acc = max(roc@tp[[1]] + roc@tn[[1]])
-  t_n = max(roc@tp[[1]] + roc@tn[[1]] + roc@fp[[1]] + roc@fn[[1]])
-  
-  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
-  data_roc <- tibble("espec"    = roc@x.values[[1]],
+  preds <- prediction(aux$fit.preval[,i], dt[[tvar]])
+  auc = performance(preds, measure = "auc")@y.values[[1]]
+  t_acc = max(preds@tp[[1]] + preds@tn[[1]])
+  t_n = max(preds@tp[[1]] + preds@tn[[1]] + preds@fp[[1]] + preds@fn[[1]])
+  roc <- performance(preds, measure = "tpr", x.measure = "fpr") 
+  data_roc <- tibble("auc"     = auc,
+                     "espec"    = roc@x.values[[1]],
                      "sens"     = roc@y.values[[1]],
                      "variable" = tvar,
                      "covariate"   = "GG")
@@ -200,12 +204,13 @@ for(tvar in variaveis_resp)
 
 for(tvar in variaveis_resp)
 {
-  db_gol = dt
-  roc <- prediction(db_gol$moca_total, db_gol[[tvar]])
-  t_acc = max(roc@tp[[1]]+roc@tn[[1]])
-  t_n = max(roc@tp[[1]]+roc@tn[[1]]+roc@fp[[1]]+roc@fn[[1]])
-  roc <- performance(roc, measure = "tpr", x.measure = "fpr") 
-  data_roc <- tibble("espec"    = roc@x.values[[1]],
+  preds <- prediction(dt$moca_total, dt[[tvar]])
+  t_acc = max(preds@tp[[1]]+preds@tn[[1]])
+  t_n = max(preds@tp[[1]]+preds@tn[[1]]+preds@fp[[1]]+preds@fn[[1]])
+  auc = performance(preds, measure = "auc")@y.values[[1]]
+  roc <- performance(preds, measure = "tpr", x.measure = "fpr") 
+  data_roc <- tibble("auc" = auc,
+                     "espec"    = roc@x.values[[1]],
                      "sens"     = roc@y.values[[1]],
                      "variable" = tvar,
                      "covariate"   = "MOCA")
@@ -243,3 +248,6 @@ g <- data_roc_all %>%
   #        adjusted with either GG variables or MoCA score")
 ggsave("./plots/amparo-analise-JG-classify-tug-cost.pdf", height = 17, width = 14)
 
+data_roc_all %>% 
+  group_by(variable, covariate) %>% 
+  summarise(auc_m = mean(auc))
