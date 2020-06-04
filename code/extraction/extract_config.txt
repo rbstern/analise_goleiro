@@ -1,0 +1,2 @@
+ELD2018 PDA2018 PDE2018 PDM2018 YOG2018
+move correct movementTime soccerTeam game phase playerAlias totalCorrect groupCode sequExecuted optionChosen

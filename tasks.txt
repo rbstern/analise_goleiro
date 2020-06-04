@@ -1,5 +1,0 @@
-Dupla tarefa:
-- Indice de dupla tarefa.
-
-JG:
-- Incluir classificador de dupla tarefa.

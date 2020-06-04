@@ -1,0 +1,5 @@
+,move,correct,movementTime,soccerTeam,game,phase,playerAlias,totalCorrect,groupCode,sequExecuted,optionChosen
+0,1,TRUE,2.193428,ELD,JG,1,y,3,ELD2018,2102,2
+1,2,TRUE,4.381477,ELD,JG,1,y,3,ELD2018,2102,1
+2,3,TRUE,0.583397,ELD,JG,1,y,3,ELD2018,2102,0
+3,4,false,0.248428,ELD,JG,1,y,3,ELD2018,2102,1
